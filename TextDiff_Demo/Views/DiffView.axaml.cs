@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Media;
 using AvaloniaEdit;
@@ -11,8 +12,13 @@ namespace TextDiff_Demo.Views
         public DiffView()
         {
             InitializeComponent();
+            OlderEditor = OlderTextEditor;
+            NewerEditor = NewerTextEditor;
             AddHighlightRenderer();
         }
+
+        public TextEditor OlderEditor { get; }
+        public TextEditor NewerEditor { get; }
 
         private void AddHighlightRenderer()
         {
@@ -30,8 +36,8 @@ namespace TextDiff_Demo.Views
             IBrush rangeBrush = new SolidColorBrush(Color.Parse("#FFFFAACC"));
 
             // 创建并添加渲染器
-            var highlightRenderer = new HighlightBackgroundRenderer(textEditor, linesToHighlight, lineRangesToHighlight, lineBrush, rangeBrush);
-            textEditor.TextArea.TextView.BackgroundRenderers.Add(highlightRenderer);
+            var highlightRenderer = new HighlightBackgroundRenderer(OlderEditor, linesToHighlight, lineRangesToHighlight, lineBrush, rangeBrush);
+            NewerEditor.TextArea.TextView.BackgroundRenderers.Add(highlightRenderer);
         }
     }
 }

@@ -10,10 +10,16 @@
         <viewModels:DiffViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="50,*">
-        <avaloniaEdit:TextEditor Grid.Row="1"
+    <Grid RowDefinitions="50,*" ColumnDefinitions="*,*">
+        <avaloniaEdit:TextEditor Grid.Row="1" Grid.Column="0"
                                  ShowLineNumbers="True"
-                                 Name="textEditor"
+                                 Name="OlderTextEditor"
+                                 FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                 SyntaxHighlighting="C#"
+                                 FontSize="14" />
+        <avaloniaEdit:TextEditor Grid.Row="1" Grid.Column="1"
+                                 ShowLineNumbers="True"
+                                 Name="NewerTextEditor"
                                  FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
                                  SyntaxHighlighting="C#"
                                  FontSize="14" />
