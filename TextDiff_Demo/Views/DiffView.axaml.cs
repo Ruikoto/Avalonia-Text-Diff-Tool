@@ -1,23 +1,33 @@
-﻿using System;
-using Avalonia;
+﻿using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using DiffPlex;
-using DiffPlex.Chunkers;
-using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
+using Avalonia.Media;
+using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
+using TextDiff_Demo.ViewModels;
 
-namespace TextDiff_Demo.Views;
-
-public partial class DiffView : UserControl
+namespace TextDiff_Demo.Views
 {
-    public DiffView()
+    public partial class DiffView : UserControl
     {
-        InitializeComponent();
-    }
+        public DiffView()
+        {
+            DiffViewModel vm = new();
+            DataContext = vm;
+            InitializeComponent();
+            AddHighlightRenderer();
+        }
 
-    public static void _4test()
-    {
-        // SideBySideDiffBuilder.Diff();
+        private void AddHighlightRenderer()
+        {
+            // 设定要高亮的行号
+            int lineNumber = 3;
+
+            // 创建背景颜色刷
+            IBrush lineBrush = new SolidColorBrush(Color.Parse("#FFDDDDDD"));
+
+            // 创建并添加渲染器
+            var highlightRenderer = new HighlightBackgroundRenderer(textEditor, lineNumber, lineBrush);
+            textEditor.TextArea.TextView.BackgroundRenderers.Add(highlightRenderer);
+        }
     }
 }

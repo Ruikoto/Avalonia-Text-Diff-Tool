@@ -7,17 +7,15 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="TextDiff_Demo.Views.DiffView">
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <viewModels:DiffViewModel />
     </Design.DataContext>
 
     <Grid RowDefinitions="50,*">
-
-        <avaloniaEdit:TextEditor Grid.Row="1" Text="Hello AvaloniaEdit!"
+        <avaloniaEdit:TextEditor Grid.Row="1"
                                  ShowLineNumbers="True"
-                                 FontFamily="Cascadia Code,Consolas,Menlo,Monospace" />
-
-
+                                 Name="textEditor"
+                                 FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
+                                 SyntaxHighlighting="C#"
+                                 FontSize="14" />
     </Grid>
 </UserControl>
