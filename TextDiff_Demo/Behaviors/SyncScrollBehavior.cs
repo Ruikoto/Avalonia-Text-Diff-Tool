@@ -22,10 +22,12 @@ public class SyncScrollBehavior
         _rightTextEditor = rightTextEditor;
 
         _leftTextEditor.TextArea.TextView.ScrollOffsetChanged += LeftScrollChanged;
+        _leftTextEditor.TextChanged += LeftScrollChanged;
         _rightTextEditor.TextArea.TextView.ScrollOffsetChanged += RightScrollChanged;
+        _rightTextEditor.TextChanged += RightScrollChanged;
     }
 
-    private void LeftScrollChanged(object sender, System.EventArgs e)
+    private void LeftScrollChanged(object? sender, System.EventArgs e)
     {
         if (_isRightScrolling) return;
         if (_leftScrollViewer == null || _rightScrollViewer == null)
@@ -35,14 +37,14 @@ public class SyncScrollBehavior
         }
 
         _isLeftScrolling = true;
-
-        var offset = _leftTextEditor.VerticalOffset;
-        _rightScrollViewer.Offset = new Vector(0, offset);
+        var verticalOffset = _leftTextEditor.VerticalOffset;
+        var horizontalOffset = _leftTextEditor.HorizontalOffset;
+        _rightScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
 
         _isLeftScrolling = false;
     }
 
-    private void RightScrollChanged(object sender, System.EventArgs e)
+    private void RightScrollChanged(object? sender, System.EventArgs e)
     {
         if (_isLeftScrolling) return;
         if (_leftScrollViewer == null || _rightScrollViewer == null)
@@ -52,10 +54,9 @@ public class SyncScrollBehavior
         }
 
         _isRightScrolling = true;
-
-        var offset = _rightTextEditor.VerticalOffset;
-        _leftScrollViewer.Offset = new Vector(0, offset);
-
+        var verticalOffset = _rightTextEditor.VerticalOffset;
+        var horizontalOffset = _rightTextEditor.HorizontalOffset;
+        _leftScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
         _isRightScrolling = false;
     }
 

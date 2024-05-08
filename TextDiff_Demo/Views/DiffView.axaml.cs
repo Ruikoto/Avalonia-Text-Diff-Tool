@@ -4,9 +4,9 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 using AvaloniaEdit;
 using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using TextDiff_Demo.Behaviors;
 using TextDiff_Demo.Utils;
 using TextDiff_Demo.ViewModels;
@@ -28,38 +28,26 @@ public partial class DiffView : UserControl
         NewerEditor = NewerTextEditor;
         NewerEditor.Options.AllowScrollBelowDocument = true;
 
-        AddHighlightRenderer();
         InitializeSyncScroll();
+
+        OlderEditor.TextChanged += OnEdit;
+        NewerEditor.TextChanged += OnEdit;
     }
 
     private TextEditor OlderEditor { get; }
     private TextEditor NewerEditor { get; }
     private DiffViewModel ViewModel { get; }
 
-    private void AddHighlightRenderer()
-    {
-        // 设置需要高亮的行号和行内的范围
-        var linesToHighlight = new[] { 2, 3, 5 };
-        var lineRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>
-        {
-            { 2, [(3, 5), (15, 4)] }, // 第2行，从索引3到5，以及索引15到4个字符
-            { 3, [(10, 7)] },
-            { 5, [(8, 10)] }
-        };
-
-        // 定义背景颜色刷
-        IBrush lineBrush = new SolidColorBrush(Color.Parse("#FFDDDDDD"));
-        IBrush rangeBrush = new SolidColorBrush(Color.Parse("#FFFFAACC"));
-
-        // 创建并添加渲染器
-        var highlightRenderer = new HighlightBackgroundRenderer(OlderEditor, linesToHighlight, lineRangesToHighlight, lineBrush, rangeBrush);
-        NewerEditor.TextArea.TextView.BackgroundRenderers.Add(highlightRenderer);
-    }
-
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
-        Render(OlderEditor.Document.Text, NewerEditor.Document.Text);
+        Render(OlderEditor.Text, NewerEditor.Text);
+    }
+
+    // 编辑事件
+    private void OnEdit(object? sender, EventArgs e)
+    {
+        Render(OlderEditor.Text, NewerEditor.Text);
     }
 
     // 渲染差异
@@ -69,18 +57,98 @@ public partial class DiffView : UserControl
 
         if (diffResult == null || (!diffResult.NewText.HasDifferences && !diffResult.OldText.HasDifferences))
         {
+            OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
             NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
             return;
         }
 
-        // 处理差异
+        // 创建字典来存储需要高亮显示的行和范围
+            var oldTextLinesToHighlight = new HashSet<int>();
+            var oldTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
-        // 清空原有的高亮渲染器
-        NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            var newTextLinesToHighlight = new HashSet<int>();
+            var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
-        // 设置新文本
+            // 处理旧文本差异
+            foreach (var line in diffResult.OldText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+            {
+                if (!line.Position.HasValue) continue;
+                oldTextLinesToHighlight.Add(line.Position.Value);
 
-    }
+                var subPieceRanges = new List<(int Start, int Length)>();
+                int currentPosition = 0;
+
+                // 遍历子片段，收集需要高亮的范围
+                foreach (var subPiece in line.SubPieces)
+                {
+                    int startPosition = currentPosition;
+                    int length = subPiece.Text?.Length ?? 0;
+
+                    if (subPiece.Type != ChangeType.Unchanged)
+                    {
+                        subPieceRanges.Add((startPosition, length));
+                    }
+
+                    // 更新当前位置
+                    currentPosition += length;
+                }
+
+                oldTextRangesToHighlight[line.Position.Value] = subPieceRanges;
+            }
+
+            // 处理新文本差异
+            foreach (var line in diffResult.NewText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+            {
+                if (!line.Position.HasValue) continue;
+                newTextLinesToHighlight.Add(line.Position.Value);
+
+                var subPieceRanges = new List<(int Start, int Length)>();
+                int currentPosition = 0;
+
+                // 遍历子片段，收集需要高亮的范围
+                foreach (var subPiece in line.SubPieces)
+                {
+                    int startPosition = currentPosition;
+                    int length = subPiece.Text?.Length ?? 0;
+
+                    if (subPiece.Type != ChangeType.Unchanged)
+                    {
+                        subPieceRanges.Add((startPosition, length));
+                    }
+
+                    // 更新当前位置
+                    currentPosition += length;
+                }
+
+                newTextRangesToHighlight[line.Position.Value] = subPieceRanges;
+            }
+
+            // 定义背景颜色刷
+            IBrush lineBrushRed = new SolidColorBrush(Color.Parse("#FFFFAACC"));
+            IBrush lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
+            IBrush rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
+            IBrush rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
+
+            // 清空原有的高亮渲染器
+            OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            OlderEditor.InvalidateVisual();
+            NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            NewerEditor.InvalidateVisual();
+
+            // 为旧文本创建并添加高亮渲染器
+            var oldHighlightRenderer = new HighlightBackgroundRenderer(OlderEditor, oldTextLinesToHighlight,
+                oldTextRangesToHighlight, lineBrushRed, rangeBrushRed);
+            OlderEditor.TextArea.TextView.BackgroundRenderers.Add(oldHighlightRenderer);
+
+            // 为新文本创建并添加高亮渲染器
+            var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
+                newTextRangesToHighlight, lineBrushGreen, rangeBrushGreen);
+            NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
+
+            // 设置文本
+            // OlderEditor.Text = oldText;
+            // NewerEditor.Text = newText;
+        }
 
     private void InitializeSyncScroll()
     {
