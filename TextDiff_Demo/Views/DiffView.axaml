@@ -5,12 +5,19 @@
              xmlns:viewModels="clr-namespace:TextDiff_Demo.ViewModels"
              xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="TextDiff_Demo.Views.DiffView">
+             x:Class="TextDiff_Demo.Views.DiffView"
+             x:DataType="viewModels:DiffViewModel">
     <Design.DataContext>
         <viewModels:DiffViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="50,*" ColumnDefinitions="*,*">
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top" Height="30" >
+                <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" FontSize="20" VerticalAlignment="Center">
+                </MenuItem>
+            </Menu>
+        </StackPanel>
         <avaloniaEdit:TextEditor Grid.Row="1" Grid.Column="0"
                                  ShowLineNumbers="True"
                                  Name="OlderTextEditor"

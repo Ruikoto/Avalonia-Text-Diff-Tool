@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using AvaloniaEdit;
 using TextDiff_Demo.Utils;
+using TextDiff_Demo.ViewModels;
 
 namespace TextDiff_Demo.Views
 {
@@ -12,6 +13,9 @@ namespace TextDiff_Demo.Views
         public DiffView()
         {
             InitializeComponent();
+
+            DataContext = new DiffViewModel();
+
             OlderEditor = OlderTextEditor;
             NewerEditor = NewerTextEditor;
             AddHighlightRenderer();
