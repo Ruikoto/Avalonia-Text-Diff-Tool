@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Media;
-using AvaloniaEdit;
-using AvaloniaEdit.Rendering;
+using TextDiff_Demo.Utils;
 using TextDiff_Demo.ViewModels;
 
 namespace TextDiff_Demo.Views

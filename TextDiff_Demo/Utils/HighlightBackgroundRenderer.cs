@@ -1,16 +1,17 @@
-﻿using AvaloniaEdit.Rendering;
+﻿using System.Linq;
 using Avalonia.Media;
-using System;
-using System.Linq;
 using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
+
+namespace TextDiff_Demo.Utils;
 
 public class HighlightBackgroundRenderer : IBackgroundRenderer
 {
     public KnownLayer Layer => KnownLayer.Background;
 
     private TextEditor _editor;
-    private int _lineNumber;
-    private IBrush _lineBrush;
+    private readonly int _lineNumber;
+    private readonly IBrush _lineBrush;
 
     public HighlightBackgroundRenderer(TextEditor editor, int lineNumber, IBrush lineBrush)
     {
@@ -21,16 +22,12 @@ public class HighlightBackgroundRenderer : IBackgroundRenderer
 
     public void Draw(TextView textView, DrawingContext drawingContext)
     {
-        if (textView.VisualLinesValid)
+        if (!textView.VisualLinesValid) return;
+        foreach (var line in textView.VisualLines)
         {
-            foreach (var line in textView.VisualLines)
-            {
-                if (line.FirstDocumentLine.LineNumber == _lineNumber)
-                {
-                    var rect = BackgroundGeometryBuilder.GetRectsFromVisualSegment(textView, line, 0, line.VisualLength).First();
-                    drawingContext.DrawRectangle(_lineBrush, null, rect);
-                }
-            }
+            if (line.FirstDocumentLine.LineNumber != _lineNumber) continue;
+            var rect = BackgroundGeometryBuilder.GetRectsFromVisualSegment(textView, line, 0, line.VisualLength).First();
+            drawingContext.DrawRectangle(_lineBrush, null, rect);
         }
     }
 }
