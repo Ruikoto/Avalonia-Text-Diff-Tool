@@ -43,7 +43,7 @@ namespace TextDiff_Demo.Utils
                 {
                     foreach (var (start, length) in ranges)
                     {
-                        var rects = BackgroundGeometryBuilder.GetRectsFromVisualSegment(textView, line, start, length);
+                        var rects = BackgroundGeometryBuilder.GetRectsFromVisualSegment(textView, line, start, start+length);
                         foreach (var rect in rects)
                         {
                             drawingContext.DrawRectangle(_rangeBrush, null, rect);

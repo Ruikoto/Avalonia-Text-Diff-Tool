@@ -14,7 +14,7 @@
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top" Height="30" >
-                <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" FontSize="20" VerticalAlignment="Center">
+                <MenuItem Header="Refresh" Click="Refresh_OnClick" FontSize="20" VerticalAlignment="Center">
                 </MenuItem>
             </Menu>
         </StackPanel>
