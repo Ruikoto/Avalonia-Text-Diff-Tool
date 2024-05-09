@@ -83,7 +83,7 @@ public partial class DiffView : UserControl
         var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
         // 处理旧文本差异
-        foreach (var line in _diffResult.OldText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+        foreach (var line in _diffResult!.OldText.Lines.Where(line => line.Type != ChangeType.Unchanged))
         {
             if (!line.Position.HasValue) continue;
             oldTextLinesToHighlight.Add(line.Position.Value);
@@ -110,7 +110,7 @@ public partial class DiffView : UserControl
         }
 
         // 处理新文本差异
-        foreach (var line in _diffResult.NewText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+        foreach (var line in _diffResult!.NewText.Lines.Where(line => line.Type != ChangeType.Unchanged))
         {
             if (!line.Position.HasValue) continue;
             newTextLinesToHighlight.Add(line.Position.Value);
