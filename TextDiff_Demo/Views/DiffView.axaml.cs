@@ -165,11 +165,13 @@ public partial class DiffView : UserControl
         OlderEditorScrollIndicatorCanvas.Children.Clear();
         NewerEditorScrollIndicatorCanvas.Children.Clear();
 
-        // 获取文本框的总高度
+        // 获取文本框的总高度和每行的高度
         var olderEditorHeight = OlderEditor.Bounds.Height;
         var newerEditorHeight = NewerEditor.Bounds.Height;
+        var olderLineHeight = OlderEditor.TextArea.TextView.DefaultLineHeight;
+        var newerLineHeight = NewerEditor.TextArea.TextView.DefaultLineHeight;
 
-        // 计算行高度比例
+        // 计算行高比例
         var olderLineHeightRatio = olderEditorHeight / OlderEditor.Document.LineCount;
         var newerLineHeightRatio = newerEditorHeight / NewerEditor.Document.LineCount;
 
@@ -189,8 +191,8 @@ public partial class DiffView : UserControl
         );
 
         // 通过行号计算需要显示的矩形
-        var olderRects = CalculateRectanglesFromLines(olderDiffLines, olderLineHeightRatio);
-        var newerRects = CalculateRectanglesFromLines(newerDiffLines, newerLineHeightRatio);
+        var olderRects = CalculateRectanglesFromLines(olderDiffLines, olderLineHeightRatio, olderLineHeight);
+        var newerRects = CalculateRectanglesFromLines(newerDiffLines, newerLineHeightRatio, newerLineHeight);
 
         // 将矩形添加到 OlderEditor 的 Canvas 中
         foreach (var rect in olderRects)
@@ -217,7 +219,7 @@ public partial class DiffView : UserControl
         }
     }
 
-    private List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio)
+    private List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio, double maxHeight)
     {
         var rects = new List<Rect>();
         var lineGroups = GroupConsecutiveLines(lines);
@@ -225,9 +227,9 @@ public partial class DiffView : UserControl
         foreach (var group in lineGroups)
         {
             var startY = (group.First() - 1) * lineHeightRatio;
-            var height = group.Count() * lineHeightRatio;
+            var height = System.Math.Min(group.Count() * lineHeightRatio, maxHeight);
 
-            rects.Add(new Rect(0, startY, 20, height));
+            rects.Add(new Rect(0, startY, 10, height));
         }
 
         return rects;
