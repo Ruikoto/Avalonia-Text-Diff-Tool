@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextDiff_Demo", "TextDiff_Demo\TextDiff_Demo.csproj", "{AD42D1F3-5949-4F6C-B334-FDB5C82A40FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia-Text-Diff-Tool", "Avalonia-Text-Diff-Tool\Avalonia-Text-Diff-Tool.csproj", "{AD42D1F3-5949-4F6C-B334-FDB5C82A40FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
