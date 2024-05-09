@@ -8,7 +8,7 @@
         x:Class="TextDiff_Demo.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Avalonia-Text-Diff-Tool">
+        Title="Avalonia Text Diff Tool">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

@@ -3,6 +3,7 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="Avalonia-Text-Diff-Tool/Views/DiffView.axaml" value="Avalonia-Text-Diff-Tool/Avalonia-Text-Diff-Tool.csproj" />
         <entry key="TextDiff_Demo/App.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
         <entry key="TextDiff_Demo/Views/DiffView.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
         <entry key="TextDiff_Demo/Views/MainWindow.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
