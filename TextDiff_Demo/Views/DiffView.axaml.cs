@@ -11,6 +11,7 @@ using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using TextDiff_Demo.Utils;
 using TextDiff_Demo.ViewModels;
+using ChangeType = DiffPlex.DiffBuilder.Model.ChangeType;
 
 namespace TextDiff_Demo.Views;
 
@@ -164,8 +165,35 @@ public partial class DiffView : UserControl
         OlderEditorScrollIndicatorCanvas.Children.Clear();
         NewerEditorScrollIndicatorCanvas.Children.Clear();
 
-        // 设置 OlderEditor 的指示器
-        foreach (var rect in olderEditorDifferences)
+        // 获取文本框的总高度
+        var olderEditorHeight = OlderEditor.Bounds.Height;
+        var newerEditorHeight = NewerEditor.Bounds.Height;
+
+        // 计算行高度比例
+        var olderLineHeightRatio = olderEditorHeight / OlderEditor.Document.LineCount;
+        var newerLineHeightRatio = newerEditorHeight / NewerEditor.Document.LineCount;
+
+        // 计算需要显示差异的行
+        var olderDiffLines = new List<int>();
+        var newerDiffLines = new List<int>();
+
+        olderDiffLines.AddRange(
+            (_diffResult?.OldText.Lines ?? Enumerable.Empty<DiffPiece>())
+            .Where(line => line.Position.HasValue && line.Type is not (ChangeType.Unchanged or ChangeType.Imaginary))
+            .Select(line => line.Position!.Value)
+        );
+        newerDiffLines.AddRange(
+            (_diffResult?.NewText.Lines ?? Enumerable.Empty<DiffPiece>())
+            .Where(line => line.Position.HasValue && line.Type is not (ChangeType.Unchanged or ChangeType.Imaginary))
+            .Select(line => line.Position!.Value)
+        );
+
+        // 通过行号计算需要显示的矩形
+        var olderRects = CalculateRectanglesFromLines(olderDiffLines, olderLineHeightRatio);
+        var newerRects = CalculateRectanglesFromLines(newerDiffLines, newerLineHeightRatio);
+
+        // 将矩形添加到 OlderEditor 的 Canvas 中
+        foreach (var rect in olderRects)
         {
             OlderEditorScrollIndicatorCanvas.Children.Add(new Border
             {
@@ -176,8 +204,8 @@ public partial class DiffView : UserControl
             });
         }
 
-        // 设置 NewerEditor 的指示器
-        foreach (var rect in newerEditorDifferences)
+        // 将矩形添加到 NewerEditor 的 Canvas 中
+        foreach (var rect in newerRects)
         {
             NewerEditorScrollIndicatorCanvas.Children.Add(new Border
             {
@@ -187,6 +215,43 @@ public partial class DiffView : UserControl
                 Margin = new Thickness(rect.X, rect.Y, 0, 0)
             });
         }
+    }
+
+    private List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio)
+    {
+        var rects = new List<Rect>();
+        var lineGroups = GroupConsecutiveLines(lines);
+
+        foreach (var group in lineGroups)
+        {
+            var startY = (group.First() - 1) * lineHeightRatio;
+            var height = group.Count() * lineHeightRatio;
+
+            rects.Add(new Rect(0, startY, 20, height));
+        }
+
+        return rects;
+    }
+
+    private IEnumerable<IEnumerable<int>> GroupConsecutiveLines(IEnumerable<int> lines)
+    {
+        var groupedLines = new List<List<int>>();
+        List<int>? currentGroup = null;
+
+        foreach (var line in lines.OrderBy(x => x))
+        {
+            if (currentGroup == null || line != currentGroup.Last() + 1)
+            {
+                currentGroup = new List<int> { line };
+                groupedLines.Add(currentGroup);
+            }
+            else
+            {
+                currentGroup.Add(line);
+            }
+        }
+
+        return groupedLines;
     }
 
     private void OnLeftScrollChanged(object? sender, EventArgs e)
@@ -282,19 +347,4 @@ public partial class DiffView : UserControl
         _rightScrollViewer = (ScrollViewer)typeof(TextEditor).GetProperty("ScrollViewer",
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(NewerEditor)!;
     }
-
-    // 示例数据用于显示修改的区域
-    private List<Rect> olderEditorDifferences = new()
-    {
-        new Rect(0, 50, 20, 10),
-        new Rect(0, 100, 20, 10),
-        new Rect(0, 200, 20, 10)
-    };
-
-    private List<Rect> newerEditorDifferences = new()
-    {
-        new Rect(0, 30, 20, 10),
-        new Rect(0, 120, 20, 10),
-        new Rect(0, 250, 20, 10)
-    };
 }
