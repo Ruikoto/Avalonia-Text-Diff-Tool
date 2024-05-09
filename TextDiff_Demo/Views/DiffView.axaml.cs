@@ -64,9 +64,17 @@ public partial class DiffView : UserControl
         {
             OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
             NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            OlderEditorScrollIndicatorCanvas.Children.Clear();
+            NewerEditorScrollIndicatorCanvas.Children.Clear();
             return;
         }
 
+        RenderTextDiff();
+        RenderScrollIndicators();
+    }
+
+    private void RenderTextDiff()
+    {
         // 创建字典来存储需要高亮显示的行和范围
         var oldTextLinesToHighlight = new HashSet<int>();
         var oldTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
@@ -149,6 +157,37 @@ public partial class DiffView : UserControl
         var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
             newTextRangesToHighlight, lineBrushGreen, rangeBrushGreen);
         NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
+    }
+
+    private void RenderScrollIndicators()
+    {
+        // 清空现有 Canvas
+        OlderEditorScrollIndicatorCanvas.Children.Clear();
+        NewerEditorScrollIndicatorCanvas.Children.Clear();
+
+        // 设置 OlderEditor 的指示器
+        foreach (var rect in olderEditorDifferences)
+        {
+            OlderEditorScrollIndicatorCanvas.Children.Add(new Border
+            {
+                Background = new SolidColorBrush(Color.Parse("#BBe64f8b")),
+                Width = rect.Width,
+                Height = rect.Height,
+                Margin = new Thickness(rect.X, rect.Y, 0, 0)
+            });
+        }
+
+        // 设置 NewerEditor 的指示器
+        foreach (var rect in newerEditorDifferences)
+        {
+            NewerEditorScrollIndicatorCanvas.Children.Add(new Border
+            {
+                Background = new SolidColorBrush(Color.Parse("#BB50a74c")),
+                Width = rect.Width,
+                Height = rect.Height,
+                Margin = new Thickness(rect.X, rect.Y, 0, 0)
+            });
+        }
     }
 
     private void OnLeftScrollChanged(object? sender, EventArgs e)
@@ -242,4 +281,19 @@ public partial class DiffView : UserControl
         _rightScrollViewer = (ScrollViewer)typeof(TextEditor).GetProperty("ScrollViewer",
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(NewerEditor)!;
     }
+
+    // 示例数据用于显示修改的区域
+    private List<Rect> olderEditorDifferences = new()
+    {
+        new Rect(0, 50, 20, 10),
+        new Rect(0, 100, 20, 10),
+        new Rect(0, 200, 20, 10)
+    };
+
+    private List<Rect> newerEditorDifferences = new()
+    {
+        new Rect(0, 30, 20, 10),
+        new Rect(0, 120, 20, 10),
+        new Rect(0, 250, 20, 10)
+    };
 }
