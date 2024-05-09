@@ -42,6 +42,8 @@ public partial class DiffView : UserControl
     private readonly double _lineHeight;
     private SideBySideDiffModel? _diffResult;
 
+    #region Render Diff
+
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
@@ -179,12 +181,12 @@ public partial class DiffView : UserControl
 
         olderDiffLines.AddRange(
             (_diffResult?.OldText.Lines ?? Enumerable.Empty<DiffPiece>())
-            .Where(line => line.Position.HasValue && line.Type is not (ChangeType.Unchanged or ChangeType.Imaginary))
+            .Where(line => line is { Position: not null, Type: not (ChangeType.Unchanged or ChangeType.Imaginary) })
             .Select(line => line.Position!.Value)
         );
         newerDiffLines.AddRange(
             (_diffResult?.NewText.Lines ?? Enumerable.Empty<DiffPiece>())
-            .Where(line => line.Position.HasValue && line.Type is not (ChangeType.Unchanged or ChangeType.Imaginary))
+            .Where(line => line is { Position: not null, Type: not (ChangeType.Unchanged or ChangeType.Imaginary) })
             .Select(line => line.Position!.Value)
         );
 
@@ -217,7 +219,8 @@ public partial class DiffView : UserControl
         }
     }
 
-    private List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio, double maxHeight)
+    private static List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio,
+        double maxHeight)
     {
         var rects = new List<Rect>();
         var lineGroups = GroupConsecutiveLines(lines);
@@ -225,7 +228,7 @@ public partial class DiffView : UserControl
         foreach (var group in lineGroups)
         {
             var startY = (group.First() - 1) * lineHeightRatio;
-            var height = Math.Min(group.Count() * lineHeightRatio, maxHeight);
+            var height = Math.Min(group.Count * lineHeightRatio, maxHeight);
 
             rects.Add(new Rect(0, startY, 20, height));
         }
@@ -233,7 +236,7 @@ public partial class DiffView : UserControl
         return rects;
     }
 
-    private IEnumerable<IEnumerable<int>> GroupConsecutiveLines(IEnumerable<int> lines)
+    private static List<List<int>> GroupConsecutiveLines(IEnumerable<int> lines)
     {
         var groupedLines = new List<List<int>>();
         List<int>? currentGroup = null;
@@ -253,6 +256,10 @@ public partial class DiffView : UserControl
 
         return groupedLines;
     }
+
+    #endregion
+
+    #region Scrolling
 
     private void OnLeftScrollChanged(object? sender, EventArgs e)
     {
@@ -347,4 +354,6 @@ public partial class DiffView : UserControl
         _rightScrollViewer = (ScrollViewer)typeof(TextEditor).GetProperty("ScrollViewer",
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(NewerEditor)!;
     }
+
+    #endregion
 }
