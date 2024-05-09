@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="TextDiff_Demo/App.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
+        <entry key="TextDiff_Demo/Views/DiffView.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
+        <entry key="TextDiff_Demo/Views/MainWindow.axaml" value="TextDiff_Demo/TextDiff_Demo.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
