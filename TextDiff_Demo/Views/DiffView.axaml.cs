@@ -23,13 +23,11 @@ public partial class DiffView : UserControl
         ViewModel = new DiffViewModel();
         DataContext = ViewModel;
 
-        OlderEditor.Options.AllowScrollBelowDocument = true;
-        NewerEditor.Options.AllowScrollBelowDocument = true;
         _lineHeight = NewerEditor.TextArea.TextView.DefaultLineHeight;
 
-        OlderEditor.TextArea.TextView.ScrollOffsetChanged += LeftScrollChanged;
+        OlderEditor.TextArea.TextView.ScrollOffsetChanged += OnLeftScrollChanged;
         NewerEditor.TextArea.TextView.ScrollOffsetChanged += RightScrollChanged;
-        OlderEditor.TextChanged += LeftScrollChanged;
+        OlderEditor.TextChanged += OnLeftScrollChanged;
         NewerEditor.TextChanged += RightScrollChanged;
         OlderEditor.TextChanged += OnEdit;
         NewerEditor.TextChanged += OnEdit;
@@ -151,13 +149,9 @@ public partial class DiffView : UserControl
         var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
             newTextRangesToHighlight, lineBrushGreen, rangeBrushGreen);
         NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
-
-        // 设置文本
-        // OlderTextEditor.Text = oldText;
-        // NewerTextEditor.Text = newText;
     }
 
-    private void LeftScrollChanged(object? sender, EventArgs e)
+    private void OnLeftScrollChanged(object? sender, EventArgs e)
     {
         if (_isRightScrolling) return;
         if (_diffResult == null) return;
@@ -183,17 +177,18 @@ public partial class DiffView : UserControl
             _isLeftScrolling = false;
             return;
         }
+
         var rightScrollLine = _diffResult.NewText.Lines[leftActualLine]?.Position;
 
         // 滚动到对应行号
         if (rightScrollLine.HasValue)
         {
-            var rightOffset = (rightScrollLine.Value - 1) * _lineHeight;
+            var rightOffset = (rightScrollLine.Value - 0) * _lineHeight;
             _rightScrollViewer.Offset = new Vector(horizontalOffset, rightOffset);
         }
 
         // 左侧对齐滚动
-        _leftScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 1) * _lineHeight);
+        // _leftScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 1) * _lineHeight);
 
         _isLeftScrolling = false;
     }
@@ -224,17 +219,18 @@ public partial class DiffView : UserControl
             _isRightScrolling = false;
             return;
         }
+
         var leftScrollLine = _diffResult.OldText.Lines[rightActualLine]?.Position;
 
         // 滚动到对应行号
         if (leftScrollLine.HasValue)
         {
-            var leftOffset = (leftScrollLine.Value - 1) * _lineHeight;
+            var leftOffset = (leftScrollLine.Value - 0) * _lineHeight;
             _leftScrollViewer.Offset = new Vector(horizontalOffset, leftOffset);
         }
 
         // 右侧对齐滚动
-        _rightScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 1) * _lineHeight);
+        // _rightScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 0) * _lineHeight);
 
         _isRightScrolling = false;
     }
