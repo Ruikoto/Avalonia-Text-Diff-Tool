@@ -12,11 +12,10 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
-            <!-- <Menu DockPanel.Dock="Top" Height="30" > -->
-            <!--     <MenuItem Header="Refresh" Click="Refresh_OnClick" FontSize="20" VerticalAlignment="Center"> -->
-            <!--     </MenuItem> -->
-            <!-- </Menu> -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Spacing="5">
+            <Button Click="Refresh_OnClick" IsEnabled="{Binding !RealTimeDiffering}">Diff</Button>
+            <ToggleButton IsChecked="{Binding RealTimeDiffering}">Real Time Differing</ToggleButton>
+            <ToggleButton IsChecked="{Binding SynchronousScrolling}">Synchronous Scrolling</ToggleButton>
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="0">

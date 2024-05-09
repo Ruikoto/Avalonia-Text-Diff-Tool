@@ -20,8 +20,8 @@ public partial class DiffView : UserControl
     {
         InitializeComponent();
 
-        ViewModel = new DiffViewModel();
-        DataContext = ViewModel;
+        _viewModel = new DiffViewModel();
+        DataContext = _viewModel;
 
         _lineHeight = NewerEditor.TextArea.TextView.DefaultLineHeight;
 
@@ -33,11 +33,9 @@ public partial class DiffView : UserControl
         NewerEditor.TextChanged += OnEdit;
     }
 
-    private DiffViewModel ViewModel { get; }
-
+    private readonly DiffViewModel _viewModel;
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
-
     private bool _isLeftScrolling;
     private bool _isRightScrolling;
     private readonly double _lineHeight;
@@ -52,6 +50,7 @@ public partial class DiffView : UserControl
     // 编辑事件
     private void OnEdit(object? sender, EventArgs e)
     {
+        if (!_viewModel.RealTimeDiffering) return;
         Render(OlderEditor.Text, NewerEditor.Text);
     }
 
@@ -192,6 +191,7 @@ public partial class DiffView : UserControl
 
     private void OnLeftScrollChanged(object? sender, EventArgs e)
     {
+        if (!_viewModel.SynchronousScrolling) return;
         if (_isRightScrolling) return;
         if (_diffResult == null) return;
         if (_leftScrollViewer == null || _rightScrollViewer == null)
@@ -234,6 +234,7 @@ public partial class DiffView : UserControl
 
     private void RightScrollChanged(object? sender, EventArgs e)
     {
+        if (!_viewModel.SynchronousScrolling) return;
         if (_isLeftScrolling) return;
         if (_diffResult == null) return;
         if (_leftScrollViewer == null || _rightScrollViewer == null)

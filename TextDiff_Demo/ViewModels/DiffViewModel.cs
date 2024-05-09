@@ -6,15 +6,29 @@ namespace TextDiff_Demo.ViewModels;
 
 public class DiffViewModel : ViewModelBase
 {
-    // public ICommand RefreshCommand { get; private set; }
-    //
-    // public DiffViewModel()
-    // {
-    //     RefreshCommand = new RelayCommand(HandleRefresh);
-    // }
-    //
-    // private void HandleRefresh(object _)
-    // {
-    //     string oldText =
-    // }
+    private bool _realTimeDiffering = true;
+    
+    public bool RealTimeDiffering
+    {
+        get => _realTimeDiffering;
+        set
+        {
+            if (value == _realTimeDiffering) return;
+            _realTimeDiffering = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool _synchronousScrolling = true;
+
+    public bool SynchronousScrolling
+    {
+        get => _synchronousScrolling;
+        set
+        {
+            if (value == _synchronousScrolling) return;
+            _synchronousScrolling = value;
+            OnPropertyChanged();
+        }
+    }
 }
