@@ -48,14 +48,14 @@ public partial class DiffView : UserControl
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
-        Render(OlderEditor.Text, NewerEditor.Text);
+        Render(OlderEditor.Text, NewerEditor.Text,false);
     }
 
     // 编辑事件
     private void OnEdit(object? sender, EventArgs e)
     {
         if (!_viewModel.RealTimeDiffering) return;
-        Render(OlderEditor.Text, NewerEditor.Text);
+        Render(OlderEditor.Text, NewerEditor.Text,false);
     }
 
     // 渲染差异
