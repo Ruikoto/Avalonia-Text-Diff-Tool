@@ -144,9 +144,7 @@ public partial class DiffView : UserControl
 
         // 清空原有的高亮渲染器
         OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
-        OlderEditor.InvalidateVisual();
         NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
-        NewerEditor.InvalidateVisual();
 
         // 为旧文本创建并添加高亮渲染器
         var oldHighlightRenderer = new HighlightBackgroundRenderer(OlderEditor, oldTextLinesToHighlight,
@@ -227,9 +225,9 @@ public partial class DiffView : UserControl
         foreach (var group in lineGroups)
         {
             var startY = (group.First() - 1) * lineHeightRatio;
-            var height = System.Math.Min(group.Count() * lineHeightRatio, maxHeight);
+            var height = Math.Min(group.Count() * lineHeightRatio, maxHeight);
 
-            rects.Add(new Rect(0, startY, 10, height));
+            rects.Add(new Rect(0, startY, 20, height));
         }
 
         return rects;
