@@ -1,13 +1,11 @@
-﻿using System.Windows.Input;
-using Archon.Tool.Common.Mvvm;
-using ReactiveUI;
-
-namespace TextDiff_Demo.ViewModels;
+﻿namespace TextDiff_Demo.ViewModels;
 
 public class DiffViewModel : ViewModelBase
 {
     private bool _realTimeDiffering = true;
-    
+
+    private bool _synchronousScrolling = true;
+
     public bool RealTimeDiffering
     {
         get => _realTimeDiffering;
@@ -18,8 +16,6 @@ public class DiffViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
-
-    private bool _synchronousScrolling = true;
 
     public bool SynchronousScrolling
     {

@@ -17,6 +17,15 @@ namespace TextDiff_Demo.Views;
 
 public partial class DiffView : UserControl
 {
+    private readonly double _lineHeight;
+
+    private readonly DiffViewModel _viewModel;
+    private SideBySideDiffModel? _diffResult;
+    private bool _isLeftScrolling;
+    private bool _isRightScrolling;
+    private ScrollViewer? _leftScrollViewer;
+    private ScrollViewer? _rightScrollViewer;
+
     public DiffView()
     {
         InitializeComponent();
@@ -33,14 +42,6 @@ public partial class DiffView : UserControl
         OlderEditor.TextChanged += OnEdit;
         NewerEditor.TextChanged += OnEdit;
     }
-
-    private readonly DiffViewModel _viewModel;
-    private ScrollViewer? _leftScrollViewer;
-    private ScrollViewer? _rightScrollViewer;
-    private bool _isLeftScrolling;
-    private bool _isRightScrolling;
-    private readonly double _lineHeight;
-    private SideBySideDiffModel? _diffResult;
 
     #region Render Diff
 
@@ -91,18 +92,15 @@ public partial class DiffView : UserControl
             oldTextLinesToHighlight.Add(line.Position.Value);
 
             var subPieceRanges = new List<(int Start, int Length)>();
-            int currentPosition = 0;
+            var currentPosition = 0;
 
             // 遍历子片段，收集需要高亮的范围
             foreach (var subPiece in line.SubPieces)
             {
-                int startPosition = currentPosition;
-                int length = subPiece.Text?.Length ?? 0;
+                var startPosition = currentPosition;
+                var length = subPiece.Text?.Length ?? 0;
 
-                if (subPiece.Type != ChangeType.Unchanged)
-                {
-                    subPieceRanges.Add((startPosition, length));
-                }
+                if (subPiece.Type != ChangeType.Unchanged) subPieceRanges.Add((startPosition, length));
 
                 // 更新当前位置
                 currentPosition += length;
@@ -118,18 +116,15 @@ public partial class DiffView : UserControl
             newTextLinesToHighlight.Add(line.Position.Value);
 
             var subPieceRanges = new List<(int Start, int Length)>();
-            int currentPosition = 0;
+            var currentPosition = 0;
 
             // 遍历子片段，收集需要高亮的范围
             foreach (var subPiece in line.SubPieces)
             {
-                int startPosition = currentPosition;
-                int length = subPiece.Text?.Length ?? 0;
+                var startPosition = currentPosition;
+                var length = subPiece.Text?.Length ?? 0;
 
-                if (subPiece.Type != ChangeType.Unchanged)
-                {
-                    subPieceRanges.Add((startPosition, length));
-                }
+                if (subPiece.Type != ChangeType.Unchanged) subPieceRanges.Add((startPosition, length));
 
                 // 更新当前位置
                 currentPosition += length;
@@ -196,7 +191,6 @@ public partial class DiffView : UserControl
 
         // 将矩形添加到 OlderEditor 的 Canvas 中
         foreach (var rect in olderRects)
-        {
             OlderEditorScrollIndicatorCanvas.Children.Add(new Border
             {
                 Background = new SolidColorBrush(Color.Parse("#BBe64f8b")),
@@ -204,11 +198,9 @@ public partial class DiffView : UserControl
                 Height = rect.Height,
                 Margin = new Thickness(rect.X, rect.Y, 0, 0)
             });
-        }
 
         // 将矩形添加到 NewerEditor 的 Canvas 中
         foreach (var rect in newerRects)
-        {
             NewerEditorScrollIndicatorCanvas.Children.Add(new Border
             {
                 Background = new SolidColorBrush(Color.Parse("#BB50a74c")),
@@ -216,7 +208,6 @@ public partial class DiffView : UserControl
                 Height = rect.Height,
                 Margin = new Thickness(rect.X, rect.Y, 0, 0)
             });
-        }
     }
 
     private static List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio,
@@ -242,7 +233,6 @@ public partial class DiffView : UserControl
         List<int>? currentGroup = null;
 
         foreach (var line in lines.OrderBy(x => x))
-        {
             if (currentGroup == null || line != currentGroup.Last() + 1)
             {
                 currentGroup = new List<int> { line };
@@ -252,7 +242,6 @@ public partial class DiffView : UserControl
             {
                 currentGroup.Add(line);
             }
-        }
 
         return groupedLines;
     }
