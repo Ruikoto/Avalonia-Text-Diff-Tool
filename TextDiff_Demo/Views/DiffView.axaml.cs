@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using AvaloniaEdit;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using TextDiff_Demo.Behaviors;
 using TextDiff_Demo.Utils;
 using TextDiff_Demo.ViewModels;
 
@@ -21,22 +22,27 @@ public partial class DiffView : UserControl
 
         ViewModel = new DiffViewModel();
         DataContext = ViewModel;
-
-        OlderEditor = OlderTextEditor;
+        
         OlderEditor.Options.AllowScrollBelowDocument = true;
-
-        NewerEditor = NewerTextEditor;
         NewerEditor.Options.AllowScrollBelowDocument = true;
+        _lineHeight = NewerEditor.TextArea.TextView.DefaultLineHeight;
 
-        InitializeSyncScroll();
-
+        OlderEditor.TextArea.TextView.ScrollOffsetChanged += LeftScrollChanged;
+        NewerEditor.TextArea.TextView.ScrollOffsetChanged += RightScrollChanged;
+        OlderEditor.TextChanged += LeftScrollChanged;
+        NewerEditor.TextChanged += RightScrollChanged;
         OlderEditor.TextChanged += OnEdit;
         NewerEditor.TextChanged += OnEdit;
     }
-
-    private TextEditor OlderEditor { get; }
-    private TextEditor NewerEditor { get; }
+    
     private DiffViewModel ViewModel { get; }
+    
+    private ScrollViewer? _leftScrollViewer;
+    private ScrollViewer? _rightScrollViewer;
+
+    private bool _isLeftScrolling;
+    private bool _isRightScrolling;
+    private readonly double _lineHeight;
 
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
@@ -146,12 +152,52 @@ public partial class DiffView : UserControl
             NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
 
             // 设置文本
-            // OlderEditor.Text = oldText;
-            // NewerEditor.Text = newText;
+            // OlderTextEditor.Text = oldText;
+            // NewerTextEditor.Text = newText;
+        }
+    
+    private void LeftScrollChanged(object? sender, EventArgs e)
+    {
+        if (_isRightScrolling) return;
+        if (_leftScrollViewer == null || _rightScrollViewer == null)
+        {
+            GetScrollViewer();
+            if (_leftScrollViewer == null || _rightScrollViewer == null) return;
         }
 
-    private void InitializeSyncScroll()
+        _isLeftScrolling = true;
+        var verticalOffset = OlderEditor.VerticalOffset;
+        var horizontalOffset = OlderEditor.HorizontalOffset;
+        _rightScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
+
+        _isLeftScrolling = false;
+    }
+
+    private void RightScrollChanged(object? sender, EventArgs e)
     {
-        new SyncScrollBehavior(OlderEditor, NewerEditor);
+        if (_isLeftScrolling) return;
+        if (_leftScrollViewer == null || _rightScrollViewer == null)
+        {
+            GetScrollViewer();
+            if (_leftScrollViewer == null || _rightScrollViewer == null) return;
+        }
+
+        _isRightScrolling = true;
+        var verticalOffset = NewerEditor.VerticalOffset;
+        var horizontalOffset = NewerEditor.HorizontalOffset;
+        _leftScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
+        _isRightScrolling = false;
+
+        // 计算行号
+        // var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
+        // Console.WriteLine(lineNumber);
+    }
+
+    private void GetScrollViewer()
+    {
+        _leftScrollViewer = (ScrollViewer)typeof(TextEditor).GetProperty("ScrollViewer",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(OlderEditor)!;
+        _rightScrollViewer = (ScrollViewer)typeof(TextEditor).GetProperty("ScrollViewer",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(NewerEditor)!;
     }
 }

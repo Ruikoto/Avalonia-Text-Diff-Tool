@@ -13,20 +13,20 @@
 
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
-            <Menu DockPanel.Dock="Top" Height="30" >
-                <MenuItem Header="Refresh" Click="Refresh_OnClick" FontSize="20" VerticalAlignment="Center">
-                </MenuItem>
-            </Menu>
+            <!-- <Menu DockPanel.Dock="Top" Height="30" > -->
+            <!--     <MenuItem Header="Refresh" Click="Refresh_OnClick" FontSize="20" VerticalAlignment="Center"> -->
+            <!--     </MenuItem> -->
+            <!-- </Menu> -->
         </StackPanel>
         <avaloniaEdit:TextEditor Grid.Row="1" Grid.Column="0"
                                  ShowLineNumbers="True"
-                                 Name="OlderTextEditor"
+                                 Name="OlderEditor"
                                  FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
                                  SyntaxHighlighting="C#"
                                  FontSize="14" />
         <avaloniaEdit:TextEditor Grid.Row="1" Grid.Column="1"
                                  ShowLineNumbers="True"
-                                 Name="NewerTextEditor"
+                                 Name="NewerEditor"
                                  FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
                                  SyntaxHighlighting="C#"
                                  FontSize="14" />
