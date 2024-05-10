@@ -22,11 +22,10 @@ public partial class DiffView : UserControl
 {
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
-
     private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
-    private readonly double _lineHeight;
     private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
     private readonly IBrush _rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
+    private readonly double _lineHeight;
     private readonly DispatcherTimer _scrollIndicatorTimer;
     private readonly DiffViewModel _viewModel;
 
@@ -55,7 +54,7 @@ public partial class DiffView : UserControl
 
         _scrollIndicatorTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(2)
+            Interval = TimeSpan.FromSeconds(1)
         };
         _scrollIndicatorTimer.Tick += ScrollIndicatorTimer_Tick;
     }
