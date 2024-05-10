@@ -2,7 +2,7 @@
 using Avalonia;
 using Avalonia.ReactiveUI;
 
-namespace TextDiff_Demo;
+namespace Avalonia_Text_Diff_Tool;
 
 internal sealed class Program
 {

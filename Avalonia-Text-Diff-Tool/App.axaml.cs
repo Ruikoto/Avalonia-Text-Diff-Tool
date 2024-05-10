@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TextDiff_Demo.ViewModels;
-using TextDiff_Demo.Views;
+using Avalonia_Text_Diff_Tool.ViewModels;
+using Avalonia_Text_Diff_Tool.Views;
 
-namespace TextDiff_Demo;
+namespace Avalonia_Text_Diff_Tool;
 
 public class App : Application
 {

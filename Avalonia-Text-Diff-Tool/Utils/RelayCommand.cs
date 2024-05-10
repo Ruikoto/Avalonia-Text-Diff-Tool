@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace TextDiff_Demo.Utils;
+namespace Avalonia_Text_Diff_Tool.Utils;
 
 public class RelayCommand : ICommand
 {

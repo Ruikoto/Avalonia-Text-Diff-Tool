@@ -1,0 +1,8 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit">
+        <Style Selector="avaloniaEdit|TextEditor">
+            <Setter Property="FontFamily" Value="Source Han Sans, NSimSun,Cascadia Code, Monospace,Microsoft YaHei"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+</Styles>

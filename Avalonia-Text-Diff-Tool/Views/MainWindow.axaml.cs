@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace TextDiff_Demo.Views;
+namespace Avalonia_Text_Diff_Tool.Views;
 
 public partial class MainWindow : Window
 {

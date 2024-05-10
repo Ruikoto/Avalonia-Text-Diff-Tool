@@ -9,11 +9,11 @@ using Avalonia.Media;
 using AvaloniaEdit;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using TextDiff_Demo.Utils;
-using TextDiff_Demo.ViewModels;
+using Avalonia_Text_Diff_Tool.Utils;
+using Avalonia_Text_Diff_Tool.ViewModels;
 using ChangeType = DiffPlex.DiffBuilder.Model.ChangeType;
 
-namespace TextDiff_Demo.Views;
+namespace Avalonia_Text_Diff_Tool.Views;
 
 public partial class DiffView : UserControl
 {

@@ -4,7 +4,7 @@ using Avalonia.Media;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 
-namespace TextDiff_Demo.Utils;
+namespace Avalonia_Text_Diff_Tool.Utils;
 
 public class HighlightBackgroundRenderer : IBackgroundRenderer
 {

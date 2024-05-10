@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:TextDiff_Demo.ViewModels"
+             xmlns:viewModels="clr-namespace:Avalonia_Text_Diff_Tool.ViewModels"
              xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="TextDiff_Demo.Views.DiffView"
+             x:Class="Avalonia_Text_Diff_Tool.Views.DiffView"
              x:DataType="viewModels:DiffViewModel">
     <Design.DataContext>
         <viewModels:DiffViewModel />
@@ -21,9 +21,7 @@
         <Grid Grid.Row="1" Grid.Column="0">
             <avaloniaEdit:TextEditor x:Name="OlderEditor"
                                      ShowLineNumbers="True"
-                                     FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
-                                     SyntaxHighlighting="C#"
-                                     FontSize="14" />
+                                     SyntaxHighlighting="C#" />
 
             <!-- 滚动条上的指示条 Canvas -->
             <Canvas x:Name="OlderEditorScrollIndicatorCanvas"
@@ -36,9 +34,7 @@
         <Grid Grid.Row="1" Grid.Column="1">
             <avaloniaEdit:TextEditor x:Name="NewerEditor"
                                      ShowLineNumbers="True"
-                                     FontFamily="Cascadia Code,Consolas,Menlo,Monospace"
-                                     SyntaxHighlighting="C#"
-                                     FontSize="14" />
+                                     SyntaxHighlighting="C#" />
 
             <!-- 滚动条上的指示条 Canvas -->
             <Canvas x:Name="NewerEditorScrollIndicatorCanvas"

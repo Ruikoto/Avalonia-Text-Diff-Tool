@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace TextDiff_Demo.ViewModels;
+namespace Avalonia_Text_Diff_Tool.ViewModels;
 
 public class ViewModelBase : INotifyPropertyChanged
 {

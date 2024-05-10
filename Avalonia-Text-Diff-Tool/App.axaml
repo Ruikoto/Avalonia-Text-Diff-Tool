@@ -1,7 +1,7 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:TextDiff_Demo"
-             x:Class="TextDiff_Demo.App">
+             xmlns:local="using:Avalonia_Text_Diff_Tool"
+             x:Class="Avalonia_Text_Diff_Tool.App">
 
     <Application.DataTemplates>
         <local:ViewLocator />
@@ -10,5 +10,6 @@
     <Application.Styles>
         <FluentTheme Mode="Light" />
         <StyleInclude Source="avares://AvaloniaEdit/AvaloniaEdit.xaml" />
+        <StyleInclude Source="avares://Avalonia-Text-Diff-Tool/Styles/TextEditorStyles.axaml"/>
     </Application.Styles>
 </Application>

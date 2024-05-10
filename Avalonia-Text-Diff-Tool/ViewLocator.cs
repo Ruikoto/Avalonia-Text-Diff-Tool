@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using TextDiff_Demo.ViewModels;
+using Avalonia_Text_Diff_Tool.ViewModels;
 
-namespace TextDiff_Demo;
+namespace Avalonia_Text_Diff_Tool;
 
 public class ViewLocator : IDataTemplate
 {

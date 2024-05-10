@@ -1,4 +1,4 @@
-﻿namespace TextDiff_Demo.ViewModels;
+﻿namespace Avalonia_Text_Diff_Tool.ViewModels;
 
 public class DiffViewModel : ViewModelBase
 {
