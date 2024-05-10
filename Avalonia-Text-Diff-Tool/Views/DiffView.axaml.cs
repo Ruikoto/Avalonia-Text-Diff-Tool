@@ -25,7 +25,7 @@ public partial class DiffView : UserControl
     private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
     private readonly IBrush _lineBrushBlue = new SolidColorBrush(Color.Parse("#FFc9c9f2"));
     private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
-    private readonly IBrush _rangeBrushBlue = new SolidColorBrush(Color.Parse("#FF9e9ebf"));
+    private readonly IBrush _rangeBrushBlue = new SolidColorBrush(Color.Parse("#FF9e9eBF"));
     private readonly double _lineHeight;
     private readonly DispatcherTimer _scrollIndicatorTimer;
     private readonly DiffViewModel _viewModel;
@@ -112,82 +112,11 @@ public partial class DiffView : UserControl
 
     private void RenderTextDiff()
     {
-        // 创建字典来存储需要高亮显示的行和范围
-        var oldTextLinesToHighlight = new HashSet<(int Index, IBrush Brush)>();
-        var oldTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
-
-        var newTextLinesToHighlight = new HashSet<(int Index, IBrush Brush)>();
-        var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
-
-        // 处理旧文本差异
-        for (var i = 0; i < _diffResult!.OldText.Lines.Count; i++)
-        {
-            var line = _diffResult!.OldText.Lines[i];
-
-            if (line.Type == ChangeType.Unchanged) continue;
-
-            var brush = line.Type switch
-            {
-                ChangeType.Imaginary => _lineBrushGray,
-                ChangeType.Deleted => _lineBrushRed,
-                ChangeType.Inserted => _lineBrushGreen,
-                ChangeType.Modified => _lineBrushBlue
-            };
-
-            oldTextLinesToHighlight.Add((i + 1, brush));
-
-            var subPieceRanges = new List<(int Start, int Length)>();
-            var currentPosition = 0;
-
-            // 遍历子片段，收集需要高亮的范围
-            foreach (var subPiece in line.SubPieces)
-            {
-                var startPosition = currentPosition;
-                var length = subPiece.Text?.Length ?? 0;
-
-                if (subPiece.Type != ChangeType.Unchanged) subPieceRanges.Add((startPosition, length));
-
-                // 更新当前位置
-                currentPosition += length;
-            }
-
-            oldTextRangesToHighlight[i + 1] = subPieceRanges;
-        }
-
-        // 处理新文本差异
-        for (var i = 0; i < _diffResult!.NewText.Lines.Count; i++)
-        {
-            var line = _diffResult!.NewText.Lines[i];
-
-            if (line.Type == ChangeType.Unchanged) continue;
-
-            var brush = line.Type switch
-            {
-                ChangeType.Imaginary => _lineBrushGray,
-                ChangeType.Deleted => _lineBrushRed,
-                ChangeType.Inserted => _lineBrushGreen,
-                ChangeType.Modified => _lineBrushBlue
-            };
-
-            newTextLinesToHighlight.Add((i + 1, brush));
-
-            var subPieceRanges = new List<(int Start, int Length)>();
-            var currentPosition = 0;
-
-            // 遍历子片段，收集需要高亮的范围
-            foreach (var subPiece in line.SubPieces)
-            {
-                var startPosition = currentPosition;
-                var length = subPiece.Text?.Length ?? 0;
-
-                if (subPiece.Type != ChangeType.Unchanged) subPieceRanges.Add((startPosition, length));
-
-                // 更新当前位置
-                currentPosition += length;
-            }
-
-            newTextRangesToHighlight[i + 1] = subPieceRanges;
-        }
+        // 处理文本差异
+        GenerateTextHighLight(_diffResult!.OldText.Lines, out var oldTextLinesToHighlight,
+            out var oldTextRangesToHighlight);
+        GenerateTextHighLight(_diffResult!.NewText.Lines, out var newTextLinesToHighlight,
+            out var newTextRangesToHighlight);
 
         // 清空原有的高亮渲染器
         OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
@@ -244,6 +173,49 @@ public partial class DiffView : UserControl
 
             _isReplacingText = false;
         }, DispatcherPriority.Background);
+    }
+
+    private void GenerateTextHighLight(List<DiffPiece> lines,
+        out HashSet<(int Index, IBrush Brush)> textLinesToHighlight,
+        out Dictionary<int, List<(int Start, int Length)>> textRangesToHighlight)
+    {
+        textLinesToHighlight = [];
+        textRangesToHighlight = [];
+
+        for (var i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+
+            if (line.Type == ChangeType.Unchanged) continue;
+
+            var brush = line.Type switch
+            {
+                ChangeType.Imaginary => _lineBrushGray,
+                ChangeType.Deleted => _lineBrushRed,
+                ChangeType.Inserted => _lineBrushGreen,
+                ChangeType.Modified => _lineBrushBlue,
+                _ => _lineBrushBlue
+            };
+
+            textLinesToHighlight.Add((i + 1, brush));
+
+            var subPieceRanges = new List<(int Start, int Length)>();
+            var currentPosition = 0;
+
+            // 遍历子片段，收集需要高亮的范围
+            foreach (var subPiece in line.SubPieces)
+            {
+                var startPosition = currentPosition;
+                var length = subPiece.Text?.Length ?? 0;
+
+                if (subPiece.Type != ChangeType.Unchanged) subPieceRanges.Add((startPosition, length));
+
+                // 更新当前位置
+                currentPosition += length;
+            }
+
+            textRangesToHighlight[i + 1] = subPieceRanges;
+        }
     }
 
     private void RenderScrollIndicators()
