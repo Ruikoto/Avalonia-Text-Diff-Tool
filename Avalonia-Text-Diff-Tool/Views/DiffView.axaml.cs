@@ -267,28 +267,30 @@ public partial class DiffView : UserControl
         var verticalOffset = OlderEditor.VerticalOffset;
         var horizontalOffset = OlderEditor.HorizontalOffset;
 
-        // 计算行号
-        var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
-
-        // 查找对应行号的新文本行号
-        var leftActualLine = _diffResult.OldText.Lines.FindIndex(x => x.Position == lineNumber);
-        if (leftActualLine == -1)
-        {
-            _isLeftScrolling = false;
-            return;
-        }
-
-        var rightScrollLine = _diffResult.NewText.Lines[leftActualLine]?.Position;
-
-        // 滚动到对应行号
-        if (rightScrollLine.HasValue)
-        {
-            var rightOffset = (rightScrollLine.Value - 0) * _lineHeight;
-            _rightScrollViewer.Offset = new Vector(horizontalOffset, rightOffset);
-        }
+        // // 计算行号
+        // var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
+        //
+        // // 查找对应行号的新文本行号
+        // var leftActualLine = _diffResult.OldText.Lines.FindIndex(x => x.Position == lineNumber);
+        // if (leftActualLine == -1)
+        // {
+        //     _isLeftScrolling = false;
+        //     return;
+        // }
+        //
+        // var rightScrollLine = _diffResult.NewText.Lines[leftActualLine]?.Position;
+        //
+        // // 滚动到对应行号
+        // if (rightScrollLine.HasValue)
+        // {
+        //     var rightOffset = (rightScrollLine.Value - 0) * _lineHeight;
+        //     _rightScrollViewer.Offset = new Vector(horizontalOffset, rightOffset);
+        // }
 
         // 左侧对齐滚动
         // _leftScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 1) * _lineHeight);
+
+        _rightScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
 
         _isLeftScrolling = false;
     }
@@ -310,28 +312,30 @@ public partial class DiffView : UserControl
         var verticalOffset = NewerEditor.VerticalOffset;
         var horizontalOffset = NewerEditor.HorizontalOffset;
 
-        // 计算行号
-        var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
-
-        // 查找对应行号的旧文本行号
-        var rightActualLine = _diffResult.NewText.Lines.FindIndex(x => x.Position == lineNumber);
-        if (rightActualLine == -1)
-        {
-            _isRightScrolling = false;
-            return;
-        }
-
-        var leftScrollLine = _diffResult.OldText.Lines[rightActualLine]?.Position;
-
-        // 滚动到对应行号
-        if (leftScrollLine.HasValue)
-        {
-            var leftOffset = (leftScrollLine.Value - 0) * _lineHeight;
-            _leftScrollViewer.Offset = new Vector(horizontalOffset, leftOffset);
-        }
+        // // 计算行号
+        // var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
+        //
+        // // 查找对应行号的旧文本行号
+        // var rightActualLine = _diffResult.NewText.Lines.FindIndex(x => x.Position == lineNumber);
+        // if (rightActualLine == -1)
+        // {
+        //     _isRightScrolling = false;
+        //     return;
+        // }
+        //
+        // var leftScrollLine = _diffResult.OldText.Lines[rightActualLine]?.Position;
+        //
+        // // 滚动到对应行号
+        // if (leftScrollLine.HasValue)
+        // {
+        //     var leftOffset = (leftScrollLine.Value - 0) * _lineHeight;
+        //     _leftScrollViewer.Offset = new Vector(horizontalOffset, leftOffset);
+        // }
 
         // 右侧对齐滚动
         // _rightScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 0) * _lineHeight);
+
+        _leftScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
 
         _isRightScrolling = false;
     }
