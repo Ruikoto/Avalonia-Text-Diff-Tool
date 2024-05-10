@@ -13,9 +13,10 @@
 
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
         <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Spacing="5">
-            <Button Click="Refresh_OnClick" IsEnabled="{Binding !RealTimeDiffering}">Diff</Button>
-            <ToggleButton IsChecked="{Binding RealTimeDiffering}">Real Time Differing</ToggleButton>
+            <Button Command="{Binding RenderCommand}" IsEnabled="{Binding EnableRenderButton}">Diff</Button>
+            <ToggleButton IsChecked="{Binding RealTimeDiffering}" IsEnabled="{Binding EnableRealTimeDifferingButton}">Real Time Differing</ToggleButton>
             <ToggleButton IsChecked="{Binding SynchronousScrolling}">Synchronous Scrolling</ToggleButton>
+            <ToggleButton IsChecked="{Binding LineAlignment}">Line Alignment</ToggleButton>
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="0">

@@ -33,8 +33,9 @@ public partial class DiffView : UserControl
 
     private SideBySideDiffModel? _diffResult;
     private bool _isLeftScrolling;
-    private bool _isReplacingText;
     private bool _isRightScrolling;
+    private bool _isReplacingText;
+    private bool _isRendering;
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
@@ -53,6 +54,8 @@ public partial class DiffView : UserControl
         NewerEditor.TextChanged += RightScrollChanged;
         OlderEditor.TextChanged += OnEdit;
         NewerEditor.TextChanged += OnEdit;
+        _viewModel.DoClearDiff += ClearDiff;
+        _viewModel.DoRender += Render;
 
         _scrollIndicatorTimer = new DispatcherTimer
         {
@@ -78,22 +81,22 @@ public partial class DiffView : UserControl
 
     #region Render Diff
 
-    // 刷新按钮点击事件
-    private void Refresh_OnClick(object? sender, RoutedEventArgs e)
-    {
-        var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
-        var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
-        Render(olderText, newerText, false);
-    }
-
     // 编辑事件
     private void OnEdit(object? sender, EventArgs e)
     {
         if (_isReplacingText) return;
         if (!_viewModel.RealTimeDiffering) return;
+        Render();
+    }
+
+    private void Render()
+    {
+        if (_isRendering) return;
+        _isRendering = true;
         var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
         var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
         Render(olderText, newerText, false);
+        _isRendering = false;
     }
 
     // 渲染差异
@@ -103,15 +106,25 @@ public partial class DiffView : UserControl
 
         if (_diffResult == null || (!_diffResult.NewText.HasDifferences && !_diffResult.OldText.HasDifferences))
         {
-            OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
-            NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
-            OlderEditorScrollIndicatorCanvas.Children.Clear();
-            NewerEditorScrollIndicatorCanvas.Children.Clear();
+            ClearDiff();
             return;
         }
 
         RenderTextDiff();
         ScheduleRenderScrollIndicators();
+    }
+
+    private void ClearDiff()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            OlderEditor.Text = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
+            NewerEditor.Text = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
+            OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
+            OlderEditorScrollIndicatorCanvas.Children.Clear();
+            NewerEditorScrollIndicatorCanvas.Children.Clear();
+        }, DispatcherPriority.Background);
     }
 
     private void RenderTextDiff()
@@ -148,10 +161,16 @@ public partial class DiffView : UserControl
             var newerSb = new StringBuilder();
 
             foreach (var line in _diffResult.OldText.Lines)
+            {
+                if (!_viewModel.LineAlignment && line.Type == ChangeType.Imaginary) continue;
                 olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
+            }
 
             foreach (var line in _diffResult.NewText.Lines)
+            {
+                if (!_viewModel.LineAlignment && line.Type == ChangeType.Imaginary) continue;
                 newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
+            }
 
             OlderEditor.Text = olderSb.ToString().TrimEnd('\r', '\n');
             NewerEditor.Text = newerSb.ToString().TrimEnd('\r', '\n');
