@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -29,6 +30,13 @@ public partial class DiffView : UserControl
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
+    private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFFFAACC"));
+    private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
+    private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
+    private readonly IBrush _rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
+    private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
+
+
     public DiffView()
     {
         InitializeComponent();
@@ -51,8 +59,8 @@ public partial class DiffView : UserControl
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
-        var olderText = OlderEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
-        var newerText = NewerEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        var olderText = Regex.Replace(OlderEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
+        var newerText = Regex.Replace(NewerEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
         Render(olderText, newerText, false);
     }
 
@@ -61,8 +69,8 @@ public partial class DiffView : UserControl
     {
         if (_isReplacingText) return;
         if (!_viewModel.RealTimeDiffering) return;
-        var olderText = OlderEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
-        var newerText = NewerEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        var olderText = Regex.Replace(OlderEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
+        var newerText = Regex.Replace(NewerEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
         Render(olderText, newerText, false);
     }
 
@@ -87,10 +95,10 @@ public partial class DiffView : UserControl
     private void RenderTextDiff()
     {
         // 创建字典来存储需要高亮显示的行和范围
-        var oldTextLinesToHighlight = new HashSet<int>();
+        var oldTextLinesToHighlight = new HashSet<(int,IBrush)>();
         var oldTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
-        var newTextLinesToHighlight = new HashSet<int>();
+        var newTextLinesToHighlight = new HashSet<(int,IBrush)>();
         var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
         // 处理旧文本差异
@@ -99,7 +107,10 @@ public partial class DiffView : UserControl
             if (_diffResult!.OldText.Lines[i].Type == ChangeType.Unchanged) continue;
             var line = _diffResult!.OldText.Lines[i];
 
-            oldTextLinesToHighlight.Add(i+1);
+            oldTextLinesToHighlight.Add(line.Type is ChangeType.Imaginary or ChangeType.Deleted
+                ? (i + 1, _lineBrushGray)
+                : (i + 1, _lineBrushRed));
+
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -124,7 +135,10 @@ public partial class DiffView : UserControl
         {
             if (_diffResult!.NewText.Lines[i].Type == ChangeType.Unchanged) continue;
             var line = _diffResult!.NewText.Lines[i];
-            newTextLinesToHighlight.Add(i+1);
+
+            newTextLinesToHighlight.Add(line.Type is ChangeType.Imaginary
+                ? (i + 1, _lineBrushGray)
+                : (i + 1, _lineBrushGreen));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -144,25 +158,23 @@ public partial class DiffView : UserControl
             newTextRangesToHighlight[i+1] = subPieceRanges;
         }
 
-        // 定义背景颜色刷
-        IBrush lineBrushRed = new SolidColorBrush(Color.Parse("#FFFFAACC"));
-        IBrush lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
-        IBrush rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
-        IBrush rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
-
         // 清空原有的高亮渲染器
         OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
         NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
 
         // 为旧文本创建并添加高亮渲染器
         var oldHighlightRenderer = new HighlightBackgroundRenderer(OlderEditor, oldTextLinesToHighlight,
-            oldTextRangesToHighlight, lineBrushRed, rangeBrushRed);
+            oldTextRangesToHighlight,  _rangeBrushRed);
         OlderEditor.TextArea.TextView.BackgroundRenderers.Add(oldHighlightRenderer);
 
         // 为新文本创建并添加高亮渲染器
         var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
-            newTextRangesToHighlight, lineBrushGreen, rangeBrushGreen);
+            newTextRangesToHighlight,  _rangeBrushGreen);
         NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
+
+        // 保存光标位置
+        var olderEditorCaretOffset = OlderEditor.CaretOffset;
+        var newerEditorCaretOffset = NewerEditor.CaretOffset;
 
         // 替换空行
         Dispatcher.UIThread.Post(() =>
@@ -173,16 +185,34 @@ public partial class DiffView : UserControl
 
             foreach (var line in _diffResult.OldText.Lines)
             {
-                olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "///EMPTY\u200bLINE///" : line.Text);
+                olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
             }
 
             foreach (var line in _diffResult.NewText.Lines)
             {
-                newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "///EMPTY\u200bLINE///" : line.Text);
+                newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
             }
 
             OlderEditor.Document.Text = olderSb.ToString();
             NewerEditor.Document.Text = newerSb.ToString();
+
+            // 恢复光标位置
+            try
+            {
+                OlderEditor.CaretOffset = olderEditorCaretOffset;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                // ignored
+            }
+            try
+            {
+                NewerEditor.CaretOffset = newerEditorCaretOffset;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                // ignored
+            }
 
             _isReplacingText = false;
         }, DispatcherPriority.Background);

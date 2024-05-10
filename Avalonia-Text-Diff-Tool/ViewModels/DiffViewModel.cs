@@ -3,8 +3,8 @@
 public class DiffViewModel : ViewModelBase
 {
     private bool _realTimeDiffering = true;
-
     private bool _synchronousScrolling = true;
+    private bool _lineAlignment = true;
 
     public bool RealTimeDiffering
     {
@@ -24,6 +24,17 @@ public class DiffViewModel : ViewModelBase
         {
             if (value == _synchronousScrolling) return;
             _synchronousScrolling = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool LineAlignment
+    {
+        get => _lineAlignment;
+        set
+        {
+            if (value == _lineAlignment) return;
+            _lineAlignment = value;
             OnPropertyChanged();
         }
     }
