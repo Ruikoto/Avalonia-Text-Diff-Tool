@@ -77,8 +77,8 @@ public partial class DiffView : UserControl
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
-        var olderText = Regex.Replace(OlderEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
-        var newerText = Regex.Replace(NewerEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
+        var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
+        var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
         Render(olderText, newerText, false);
     }
 
@@ -87,8 +87,8 @@ public partial class DiffView : UserControl
     {
         if (_isReplacingText) return;
         if (!_viewModel.RealTimeDiffering) return;
-        var olderText = Regex.Replace(OlderEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
-        var newerText = Regex.Replace(NewerEditor.Text.Replace("\u200b\r\n", string.Empty), @"(\r?\n){2,}$", "\n");
+        var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
+        var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
         Render(olderText, newerText, false);
     }
 
