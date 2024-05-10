@@ -35,7 +35,7 @@ public partial class DiffView : UserControl
     private bool _isLeftScrolling;
     private bool _isRightScrolling;
     private bool _isReplacingText;
-    private bool _isRendering;
+    private bool _isClearing;
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
@@ -85,18 +85,16 @@ public partial class DiffView : UserControl
     private void OnEdit(object? sender, EventArgs e)
     {
         if (_isReplacingText) return;
+        if (_isClearing) return;
         if (!_viewModel.RealTimeDiffering) return;
         Render();
     }
 
     private void Render()
     {
-        if (_isRendering) return;
-        _isRendering = true;
         var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
         var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
         Render(olderText, newerText, false);
-        _isRendering = false;
     }
 
     // 渲染差异
@@ -118,12 +116,14 @@ public partial class DiffView : UserControl
     {
         Dispatcher.UIThread.Post(() =>
         {
+            _isClearing = true;
             OlderEditor.Text = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
             NewerEditor.Text = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
             OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
             NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
             OlderEditorScrollIndicatorCanvas.Children.Clear();
             NewerEditorScrollIndicatorCanvas.Children.Clear();
+            _isClearing = false;
         }, DispatcherPriority.Background);
     }
 
