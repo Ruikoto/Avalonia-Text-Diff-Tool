@@ -21,8 +21,9 @@ namespace Avalonia_Text_Diff_Tool.Views;
 public partial class DiffView : UserControl
 {
     private readonly double _lineHeight;
-
     private readonly DiffViewModel _viewModel;
+    private readonly DispatcherTimer _scrollIndicatorTimer;
+
     private SideBySideDiffModel? _diffResult;
     private bool _isLeftScrolling;
     private bool _isRightScrolling;
@@ -30,7 +31,7 @@ public partial class DiffView : UserControl
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
-    private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFaaAAcc"));
+    private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
@@ -51,6 +52,24 @@ public partial class DiffView : UserControl
         NewerEditor.TextChanged += RightScrollChanged;
         OlderEditor.TextChanged += OnEdit;
         NewerEditor.TextChanged += OnEdit;
+
+        _scrollIndicatorTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(2)
+        };
+        _scrollIndicatorTimer.Tick += ScrollIndicatorTimer_Tick;
+    }
+
+    private void ScrollIndicatorTimer_Tick(object? sender, EventArgs e)
+    {
+        _scrollIndicatorTimer.Stop();
+        RenderScrollIndicators();
+    }
+
+    private void ScheduleRenderScrollIndicators()
+    {
+        _scrollIndicatorTimer.Stop();
+        _scrollIndicatorTimer.Start();
     }
 
     #region Render Diff
@@ -88,7 +107,7 @@ public partial class DiffView : UserControl
         }
 
         RenderTextDiff();
-        RenderScrollIndicators();
+        ScheduleRenderScrollIndicators();
     }
 
     private void RenderTextDiff()
@@ -113,7 +132,7 @@ public partial class DiffView : UserControl
                 _ => _lineBrushRed
             };
 
-            oldTextLinesToHighlight.Add((i+1, brush));
+            oldTextLinesToHighlight.Add((i + 1, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -130,7 +149,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            oldTextRangesToHighlight[i+1] = subPieceRanges;
+            oldTextRangesToHighlight[i + 1] = subPieceRanges;
         }
 
         // 处理新文本差异
@@ -146,7 +165,7 @@ public partial class DiffView : UserControl
                 _ => _lineBrushGreen
             };
 
-            newTextLinesToHighlight.Add((i+1, brush));
+            newTextLinesToHighlight.Add((i + 1, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -163,7 +182,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            newTextRangesToHighlight[i+1] = subPieceRanges;
+            newTextRangesToHighlight[i + 1] = subPieceRanges;
         }
 
         // 清空原有的高亮渲染器
@@ -278,31 +297,31 @@ public partial class DiffView : UserControl
 
 
     private static List<(double X, double Y, double Width, double Height, IBrush Brush)> CalculateRectanglesFromIndexes(
-        IEnumerable<(int Index, IBrush Brush)> indexes, double totalHeight, int totalLines, double lineHeight)
+        IEnumerable<(int Index, IBrush Brush, int Count)> indexes, double totalHeight, int totalLines,
+        double lineHeight)
     {
         var rects = new List<(double X, double Y, double Width, double Height, IBrush Brush)>();
-        var indexGroups = GroupConsecutiveIndexes(indexes);
 
         // 计算比例因子
         var ratio = totalHeight / (totalLines * lineHeight);
 
-        foreach (var group in indexGroups)
+        foreach (var (index, brush, count) in indexes)
         {
-            var first = group.First();
-            var startY = first.Index * ratio * lineHeight;
-            var height = Math.Min(group.Count * ratio * lineHeight, lineHeight);
+            var startY = index * ratio * lineHeight;
+            var height = Math.Min(count * ratio * lineHeight, lineHeight);
 
-            rects.Add((0, startY, 20, height, first.Brush));
+            rects.Add((0, startY, 20, height, brush));
         }
 
         return rects;
     }
 
-    private static List<(int Index, IBrush Brush)> GetDiffIndexes(IEnumerable<DiffPiece>? lines)
+
+    private static List<(int Index, IBrush Brush, int Count)> GetDiffIndexes(IEnumerable<DiffPiece>? lines)
     {
         if (lines == null) return [];
 
-        var diffIndexes = new List<(int Index, IBrush Brush)>();
+        var diffIndexes = new List<(int Index, IBrush Brush, int Count)>();
 
         for (var i = 0; i < lines.Count(); i++)
         {
@@ -315,11 +334,12 @@ public partial class DiffView : UserControl
                 _ => null
             };
 
-            if (brush != null) diffIndexes.Add((i, brush));
+            if (brush != null) diffIndexes.Add((i, brush, 1));
         }
 
         return diffIndexes;
     }
+
 
     private static List<List<(int Index, IBrush Brush)>> GroupConsecutiveIndexes(
         IEnumerable<(int Index, IBrush Brush)> indexes)
