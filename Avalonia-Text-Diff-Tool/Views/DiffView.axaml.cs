@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -11,6 +12,7 @@ using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using Avalonia_Text_Diff_Tool.Utils;
 using Avalonia_Text_Diff_Tool.ViewModels;
+using Avalonia.Threading;
 using ChangeType = DiffPlex.DiffBuilder.Model.ChangeType;
 
 namespace Avalonia_Text_Diff_Tool.Views;
@@ -23,6 +25,7 @@ public partial class DiffView : UserControl
     private SideBySideDiffModel? _diffResult;
     private bool _isLeftScrolling;
     private bool _isRightScrolling;
+    private bool _isReplacingText;
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
@@ -48,14 +51,19 @@ public partial class DiffView : UserControl
     // 刷新按钮点击事件
     private void Refresh_OnClick(object? sender, RoutedEventArgs e)
     {
-        Render(OlderEditor.Text, NewerEditor.Text,false);
+        var olderText = OlderEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        var newerText = NewerEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        Render(olderText, newerText, false);
     }
 
     // 编辑事件
     private void OnEdit(object? sender, EventArgs e)
     {
+        if (_isReplacingText) return;
         if (!_viewModel.RealTimeDiffering) return;
-        Render(OlderEditor.Text, NewerEditor.Text,false);
+        var olderText = OlderEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        var newerText = NewerEditor.Text.Replace("///EMPTY\u200bLINE///\r\n", string.Empty);
+        Render(olderText, newerText, false);
     }
 
     // 渲染差异
@@ -86,10 +94,12 @@ public partial class DiffView : UserControl
         var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
         // 处理旧文本差异
-        foreach (var line in _diffResult!.OldText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+        for (var i = 0; i < _diffResult!.OldText.Lines.Count; i++)
         {
-            if (!line.Position.HasValue) continue;
-            oldTextLinesToHighlight.Add(line.Position.Value);
+            if (_diffResult!.OldText.Lines[i].Type == ChangeType.Unchanged) continue;
+            var line = _diffResult!.OldText.Lines[i];
+
+            oldTextLinesToHighlight.Add(i+1);
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -106,14 +116,15 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            oldTextRangesToHighlight[line.Position.Value] = subPieceRanges;
+            oldTextRangesToHighlight[i+1] = subPieceRanges;
         }
 
         // 处理新文本差异
-        foreach (var line in _diffResult!.NewText.Lines.Where(line => line.Type != ChangeType.Unchanged))
+        for (var i = 0; i < _diffResult!.NewText.Lines.Count; i++)
         {
-            if (!line.Position.HasValue) continue;
-            newTextLinesToHighlight.Add(line.Position.Value);
+            if (_diffResult!.NewText.Lines[i].Type == ChangeType.Unchanged) continue;
+            var line = _diffResult!.NewText.Lines[i];
+            newTextLinesToHighlight.Add(i+1);
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -130,7 +141,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            newTextRangesToHighlight[line.Position.Value] = subPieceRanges;
+            newTextRangesToHighlight[i+1] = subPieceRanges;
         }
 
         // 定义背景颜色刷
@@ -152,6 +163,29 @@ public partial class DiffView : UserControl
         var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
             newTextRangesToHighlight, lineBrushGreen, rangeBrushGreen);
         NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
+
+        // 替换空行
+        Dispatcher.UIThread.Post(() =>
+        {
+            _isReplacingText = true;
+            var olderSb = new StringBuilder();
+            var newerSb = new StringBuilder();
+
+            foreach (var line in _diffResult.OldText.Lines)
+            {
+                olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "///EMPTY\u200bLINE///" : line.Text);
+            }
+
+            foreach (var line in _diffResult.NewText.Lines)
+            {
+                newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "///EMPTY\u200bLINE///" : line.Text);
+            }
+
+            OlderEditor.Document.Text = olderSb.ToString();
+            NewerEditor.Document.Text = newerSb.ToString();
+
+            _isReplacingText = false;
+        }, DispatcherPriority.Background);
     }
 
     private void RenderScrollIndicators()
@@ -174,6 +208,7 @@ public partial class DiffView : UserControl
         var olderDiffLines = new List<int>();
         var newerDiffLines = new List<int>();
 
+        // TODO 改
         olderDiffLines.AddRange(
             (_diffResult?.OldText.Lines ?? Enumerable.Empty<DiffPiece>())
             .Where(line => line is { Position: not null, Type: not (ChangeType.Unchanged or ChangeType.Imaginary) })
