@@ -8,7 +8,7 @@ public class DiffViewModel : ViewModelBase
 {
     private bool _realTimeDiffering = true;
     private bool _synchronousScrolling = true;
-    private bool _lineAlignment = true;
+    private bool _enableDiff = true;
     private bool _enableRealTimeDifferingButton = true;
     private bool _enableRenderButton;
     public event Action? DoClearDiff;
@@ -67,13 +67,13 @@ public class DiffViewModel : ViewModelBase
         }
     }
 
-    public bool LineAlignment
+    public bool EnableDiff
     {
-        get => _lineAlignment;
+        get => _enableDiff;
         set
         {
-            if (value == _lineAlignment) return;
-            _lineAlignment = value;
+            if (value == _enableDiff) return;
+            _enableDiff = value;
             if (value)
             {
                 RealTimeDiffering = true;

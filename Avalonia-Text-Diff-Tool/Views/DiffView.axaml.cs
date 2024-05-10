@@ -162,13 +162,13 @@ public partial class DiffView : UserControl
 
             foreach (var line in _diffResult.OldText.Lines)
             {
-                if (!_viewModel.LineAlignment && line.Type == ChangeType.Imaginary) continue;
+                if (!_viewModel.EnableDiff && line.Type == ChangeType.Imaginary) continue;
                 olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
             }
 
             foreach (var line in _diffResult.NewText.Lines)
             {
-                if (!_viewModel.LineAlignment && line.Type == ChangeType.Imaginary) continue;
+                if (!_viewModel.EnableDiff && line.Type == ChangeType.Imaginary) continue;
                 newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
             }
 
