@@ -20,6 +20,8 @@ namespace Avalonia_Text_Diff_Tool.Views;
 
 public partial class DiffView : UserControl
 {
+    private const int ScrollIndicatorWidth = 20;
+
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
     private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
@@ -62,14 +64,17 @@ public partial class DiffView : UserControl
 
     private void ScrollIndicatorTimer_Tick(object? sender, EventArgs e)
     {
-        _scrollIndicatorTimer.Stop();
+        _scrollIndicatorTimer.IsEnabled = false; // 使用 IsEnabled 而不是 Stop
         RenderScrollIndicators();
     }
 
     private void ScheduleRenderScrollIndicators()
     {
-        _scrollIndicatorTimer.Stop();
-        _scrollIndicatorTimer.Start();
+        // 如果计时器未启动，则启用计时器
+        if (!_scrollIndicatorTimer.IsEnabled)
+        {
+            _scrollIndicatorTimer.IsEnabled = true;
+        }
     }
 
     #region Render Diff
@@ -282,7 +287,7 @@ public partial class DiffView : UserControl
             var startY = first.Index * ratio * lineHeight;
             var height = Math.Min(group.Sum(x => x.Count) * ratio * lineHeight, group.Sum(x => x.Count) * lineHeight);
 
-            rects.Add((0, startY, 20, height, first.Brush));
+            rects.Add((0, startY, ScrollIndicatorWidth, height, first.Brush));
         }
 
         return rects;
