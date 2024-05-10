@@ -23,8 +23,9 @@ public partial class DiffView : UserControl
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
     private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
+    private readonly IBrush _lineBrushBlue = new SolidColorBrush(Color.Parse("#FFc9c9f2"));
     private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
-    private readonly IBrush _rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
+    private readonly IBrush _rangeBrushBlue = new SolidColorBrush(Color.Parse("#FF9e9ebf"));
     private readonly double _lineHeight;
     private readonly DispatcherTimer _scrollIndicatorTimer;
     private readonly DiffViewModel _viewModel;
@@ -127,8 +128,10 @@ public partial class DiffView : UserControl
 
             var brush = line.Type switch
             {
-                ChangeType.Imaginary or ChangeType.Deleted => _lineBrushGray,
-                _ => _lineBrushRed
+                ChangeType.Imaginary => _lineBrushGray,
+                ChangeType.Deleted => _lineBrushRed,
+                ChangeType.Inserted => _lineBrushGreen,
+                ChangeType.Modified => _lineBrushBlue
             };
 
             oldTextLinesToHighlight.Add((i + 1, brush));
@@ -160,8 +163,10 @@ public partial class DiffView : UserControl
 
             var brush = line.Type switch
             {
-                ChangeType.Imaginary or ChangeType.Deleted => _lineBrushGray,
-                _ => _lineBrushGreen
+                ChangeType.Imaginary => _lineBrushGray,
+                ChangeType.Deleted => _lineBrushRed,
+                ChangeType.Inserted => _lineBrushGreen,
+                ChangeType.Modified => _lineBrushBlue
             };
 
             newTextLinesToHighlight.Add((i + 1, brush));
@@ -190,7 +195,7 @@ public partial class DiffView : UserControl
 
         // 为旧文本创建并添加高亮渲染器
         var oldHighlightRenderer = new HighlightBackgroundRenderer(OlderEditor, oldTextLinesToHighlight,
-            oldTextRangesToHighlight, _rangeBrushRed);
+            oldTextRangesToHighlight, _rangeBrushBlue);
         OlderEditor.TextArea.TextView.BackgroundRenderers.Add(oldHighlightRenderer);
 
         // 为新文本创建并添加高亮渲染器
@@ -323,9 +328,10 @@ public partial class DiffView : UserControl
             var line = lines.ElementAt(i);
             var brush = line.Type switch
             {
-                ChangeType.Imaginary or ChangeType.Deleted => new SolidColorBrush(Color.Parse("#BBa4a4a4")),
-                ChangeType.Inserted => new SolidColorBrush(Color.Parse("#BB50a74c")),
-                ChangeType.Modified => new SolidColorBrush(Color.Parse("#BBe64f8b")),
+                ChangeType.Deleted => new SolidColorBrush(Color.Parse("#BBffAAcc")), // Red
+                ChangeType.Imaginary => new SolidColorBrush(Color.Parse("#BBa4a4a4")), // Gray
+                ChangeType.Inserted => new SolidColorBrush(Color.Parse("#BB50a74c")), // Green
+                ChangeType.Modified => new SolidColorBrush(Color.Parse("#BBc9c9f2")), //  Blue
                 _ => null
             };
 
