@@ -30,12 +30,11 @@ public partial class DiffView : UserControl
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
-    private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFFFAACC"));
+    private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFaaAAcc"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _rangeBrushRed = new SolidColorBrush(Color.Parse("#FFcc88a3"));
     private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
-
 
     public DiffView()
     {
@@ -95,22 +94,26 @@ public partial class DiffView : UserControl
     private void RenderTextDiff()
     {
         // 创建字典来存储需要高亮显示的行和范围
-        var oldTextLinesToHighlight = new HashSet<(int,IBrush)>();
+        var oldTextLinesToHighlight = new HashSet<(int Index, IBrush Brush)>();
         var oldTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
-        var newTextLinesToHighlight = new HashSet<(int,IBrush)>();
+        var newTextLinesToHighlight = new HashSet<(int Index, IBrush Brush)>();
         var newTextRangesToHighlight = new Dictionary<int, List<(int Start, int Length)>>();
 
         // 处理旧文本差异
         for (var i = 0; i < _diffResult!.OldText.Lines.Count; i++)
         {
-            if (_diffResult!.OldText.Lines[i].Type == ChangeType.Unchanged) continue;
             var line = _diffResult!.OldText.Lines[i];
 
-            oldTextLinesToHighlight.Add(line.Type is ChangeType.Imaginary or ChangeType.Deleted
-                ? (i + 1, _lineBrushGray)
-                : (i + 1, _lineBrushRed));
+            if (line.Type == ChangeType.Unchanged) continue;
 
+            var brush = line.Type switch
+            {
+                ChangeType.Imaginary or ChangeType.Deleted => _lineBrushGray,
+                _ => _lineBrushRed
+            };
+
+            oldTextLinesToHighlight.Add((i, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -127,18 +130,23 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            oldTextRangesToHighlight[i+1] = subPieceRanges;
+            oldTextRangesToHighlight[i] = subPieceRanges;
         }
 
         // 处理新文本差异
         for (var i = 0; i < _diffResult!.NewText.Lines.Count; i++)
         {
-            if (_diffResult!.NewText.Lines[i].Type == ChangeType.Unchanged) continue;
             var line = _diffResult!.NewText.Lines[i];
 
-            newTextLinesToHighlight.Add(line.Type is ChangeType.Imaginary
-                ? (i + 1, _lineBrushGray)
-                : (i + 1, _lineBrushGreen));
+            if (line.Type == ChangeType.Unchanged) continue;
+
+            var brush = line.Type switch
+            {
+                ChangeType.Imaginary or ChangeType.Deleted => _lineBrushGray,
+                _ => _lineBrushGreen
+            };
+
+            newTextLinesToHighlight.Add((i, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -155,7 +163,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            newTextRangesToHighlight[i+1] = subPieceRanges;
+            newTextRangesToHighlight[i] = subPieceRanges;
         }
 
         // 清空原有的高亮渲染器
@@ -164,12 +172,12 @@ public partial class DiffView : UserControl
 
         // 为旧文本创建并添加高亮渲染器
         var oldHighlightRenderer = new HighlightBackgroundRenderer(OlderEditor, oldTextLinesToHighlight,
-            oldTextRangesToHighlight,  _rangeBrushRed);
+            oldTextRangesToHighlight, _rangeBrushRed);
         OlderEditor.TextArea.TextView.BackgroundRenderers.Add(oldHighlightRenderer);
 
         // 为新文本创建并添加高亮渲染器
         var newHighlightRenderer = new HighlightBackgroundRenderer(NewerEditor, newTextLinesToHighlight,
-            newTextRangesToHighlight,  _rangeBrushGreen);
+            newTextRangesToHighlight, _rangeBrushGreen);
         NewerEditor.TextArea.TextView.BackgroundRenderers.Add(newHighlightRenderer);
 
         // 保存光标位置
@@ -193,23 +201,24 @@ public partial class DiffView : UserControl
                 newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
             }
 
-            OlderEditor.Document.Text = olderSb.ToString();
-            NewerEditor.Document.Text = newerSb.ToString();
+            OlderEditor.Text = olderSb.ToString().TrimEnd('\r', '\n');
+            NewerEditor.Text = newerSb.ToString().TrimEnd('\r', '\n');
 
             // 恢复光标位置
             try
             {
                 OlderEditor.CaretOffset = olderEditorCaretOffset;
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
                 // ignored
             }
+
             try
             {
                 NewerEditor.CaretOffset = newerEditorCaretOffset;
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
                 // ignored
             }
@@ -227,88 +236,111 @@ public partial class DiffView : UserControl
         // 获取文本框的总高度和每行的高度
         var olderEditorHeight = OlderEditor.Bounds.Height;
         var newerEditorHeight = NewerEditor.Bounds.Height;
-        var olderLineHeight = OlderEditor.TextArea.TextView.DefaultLineHeight;
-        var newerLineHeight = NewerEditor.TextArea.TextView.DefaultLineHeight;
 
-        // 计算行高比例
-        var olderLineHeightRatio = olderEditorHeight / OlderEditor.Document.LineCount;
-        var newerLineHeightRatio = newerEditorHeight / NewerEditor.Document.LineCount;
+        // 获取总行数
+        var olderTotalLines = OlderEditor.Document.LineCount;
+        var newerTotalLines = NewerEditor.Document.LineCount;
 
         // 计算需要显示差异的行
-        var olderDiffLines = new List<int>();
-        var newerDiffLines = new List<int>();
+        var olderDiffIndexes = GetDiffIndexes(_diffResult?.OldText.Lines);
+        var newerDiffIndexes = GetDiffIndexes(_diffResult?.NewText.Lines);
 
-        // TODO 改
-        olderDiffLines.AddRange(
-            (_diffResult?.OldText.Lines ?? Enumerable.Empty<DiffPiece>())
-            .Where(line => line is { Position: not null, Type: not (ChangeType.Unchanged or ChangeType.Imaginary) })
-            .Select(line => line.Position!.Value)
-        );
-        newerDiffLines.AddRange(
-            (_diffResult?.NewText.Lines ?? Enumerable.Empty<DiffPiece>())
-            .Where(line => line is { Position: not null, Type: not (ChangeType.Unchanged or ChangeType.Imaginary) })
-            .Select(line => line.Position!.Value)
-        );
-
-        // 通过行号计算需要显示的矩形
-        var olderRects = CalculateRectanglesFromLines(olderDiffLines, olderLineHeightRatio, olderLineHeight);
-        var newerRects = CalculateRectanglesFromLines(newerDiffLines, newerLineHeightRatio, newerLineHeight);
+        // 通过索引计算需要显示的矩形
+        var olderRects =
+            CalculateRectanglesFromIndexes(olderDiffIndexes, olderEditorHeight, olderTotalLines, _lineHeight);
+        var newerRects =
+            CalculateRectanglesFromIndexes(newerDiffIndexes, newerEditorHeight, newerTotalLines, _lineHeight);
 
         // 将矩形添加到 OlderEditor 的 Canvas 中
-        foreach (var rect in olderRects)
+        foreach (var (x, y, width, height, brush) in olderRects)
+        {
             OlderEditorScrollIndicatorCanvas.Children.Add(new Border
             {
-                Background = new SolidColorBrush(Color.Parse("#BBe64f8b")),
-                Width = rect.Width,
-                Height = rect.Height,
-                Margin = new Thickness(rect.X, rect.Y, 0, 0)
+                Background = brush,
+                Width = width,
+                Height = height,
+                Margin = new Thickness(x, y, 0, 0)
             });
+        }
 
         // 将矩形添加到 NewerEditor 的 Canvas 中
-        foreach (var rect in newerRects)
+        foreach (var (x, y, width, height, brush) in newerRects)
+        {
             NewerEditorScrollIndicatorCanvas.Children.Add(new Border
             {
-                Background = new SolidColorBrush(Color.Parse("#BB50a74c")),
-                Width = rect.Width,
-                Height = rect.Height,
-                Margin = new Thickness(rect.X, rect.Y, 0, 0)
+                Background = brush,
+                Width = width,
+                Height = height,
+                Margin = new Thickness(x, y, 0, 0)
             });
+        }
     }
 
-    private static List<Rect> CalculateRectanglesFromLines(IEnumerable<int> lines, double lineHeightRatio,
-        double maxHeight)
+
+    private static List<(double X, double Y, double Width, double Height, IBrush Brush)> CalculateRectanglesFromIndexes(
+        IEnumerable<(int Index, IBrush Brush)> indexes, double totalHeight, int totalLines, double lineHeight)
     {
-        var rects = new List<Rect>();
-        var lineGroups = GroupConsecutiveLines(lines);
+        var rects = new List<(double X, double Y, double Width, double Height, IBrush Brush)>();
+        var indexGroups = GroupConsecutiveIndexes(indexes);
 
-        foreach (var group in lineGroups)
+        // 计算比例因子
+        var ratio = totalHeight / (totalLines * lineHeight);
+
+        foreach (var group in indexGroups)
         {
-            var startY = (group.First() - 1) * lineHeightRatio;
-            var height = Math.Min(group.Count * lineHeightRatio, maxHeight);
+            var first = group.First();
+            var startY = first.Index * ratio * lineHeight;
+            var height = Math.Min(group.Count * ratio * lineHeight, lineHeight);
 
-            rects.Add(new Rect(0, startY, 20, height));
+            rects.Add((0, startY, 20, height, first.Brush));
         }
 
         return rects;
     }
 
-    private static List<List<int>> GroupConsecutiveLines(IEnumerable<int> lines)
+    private static List<(int Index, IBrush Brush)> GetDiffIndexes(IEnumerable<DiffPiece>? lines)
     {
-        var groupedLines = new List<List<int>>();
-        List<int>? currentGroup = null;
+        if (lines == null) return [];
 
-        foreach (var line in lines.OrderBy(x => x))
-            if (currentGroup == null || line != currentGroup.Last() + 1)
+        var diffIndexes = new List<(int Index, IBrush Brush)>();
+
+        for (var i = 0; i < lines.Count(); i++)
+        {
+            var line = lines.ElementAt(i);
+            var brush = line.Type switch
             {
-                currentGroup = new List<int> { line };
-                groupedLines.Add(currentGroup);
+                ChangeType.Imaginary or ChangeType.Deleted => new SolidColorBrush(Color.Parse("#BBa4a4a4")),
+                ChangeType.Inserted => new SolidColorBrush(Color.Parse("#BB50a74c")),
+                ChangeType.Modified => new SolidColorBrush(Color.Parse("#BBe64f8b")),
+                _ => null
+            };
+
+            if (brush != null) diffIndexes.Add((i, brush));
+        }
+
+        return diffIndexes;
+    }
+
+    private static List<List<(int Index, IBrush Brush)>> GroupConsecutiveIndexes(
+        IEnumerable<(int Index, IBrush Brush)> indexes)
+    {
+        var groupedIndexes = new List<List<(int Index, IBrush Brush)>>();
+        List<(int Index, IBrush Brush)>? currentGroup = null;
+
+        foreach (var index in indexes.OrderBy(x => x.Index))
+        {
+            if (currentGroup == null || index.Index != currentGroup.Last().Index + 1)
+            {
+                currentGroup = new List<(int Index, IBrush Brush)> { index };
+                groupedIndexes.Add(currentGroup);
             }
             else
             {
-                currentGroup.Add(line);
+                currentGroup.Add(index);
             }
+        }
 
-        return groupedLines;
+        return groupedIndexes;
     }
 
     #endregion
@@ -332,29 +364,6 @@ public partial class DiffView : UserControl
         var verticalOffset = OlderEditor.VerticalOffset;
         var horizontalOffset = OlderEditor.HorizontalOffset;
 
-        // // 计算行号
-        // var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
-        //
-        // // 查找对应行号的新文本行号
-        // var leftActualLine = _diffResult.OldText.Lines.FindIndex(x => x.Position == lineNumber);
-        // if (leftActualLine == -1)
-        // {
-        //     _isLeftScrolling = false;
-        //     return;
-        // }
-        //
-        // var rightScrollLine = _diffResult.NewText.Lines[leftActualLine]?.Position;
-        //
-        // // 滚动到对应行号
-        // if (rightScrollLine.HasValue)
-        // {
-        //     var rightOffset = (rightScrollLine.Value - 0) * _lineHeight;
-        //     _rightScrollViewer.Offset = new Vector(horizontalOffset, rightOffset);
-        // }
-
-        // 左侧对齐滚动
-        // _leftScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 1) * _lineHeight);
-
         _rightScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
 
         _isLeftScrolling = false;
@@ -376,29 +385,6 @@ public partial class DiffView : UserControl
         // 取得当前滚动位置
         var verticalOffset = NewerEditor.VerticalOffset;
         var horizontalOffset = NewerEditor.HorizontalOffset;
-
-        // // 计算行号
-        // var lineNumber = (int)(verticalOffset / _lineHeight) + 1;
-        //
-        // // 查找对应行号的旧文本行号
-        // var rightActualLine = _diffResult.NewText.Lines.FindIndex(x => x.Position == lineNumber);
-        // if (rightActualLine == -1)
-        // {
-        //     _isRightScrolling = false;
-        //     return;
-        // }
-        //
-        // var leftScrollLine = _diffResult.OldText.Lines[rightActualLine]?.Position;
-        //
-        // // 滚动到对应行号
-        // if (leftScrollLine.HasValue)
-        // {
-        //     var leftOffset = (leftScrollLine.Value - 0) * _lineHeight;
-        //     _leftScrollViewer.Offset = new Vector(horizontalOffset, leftOffset);
-        // }
-
-        // 右侧对齐滚动
-        // _rightScrollViewer.Offset = new Vector(horizontalOffset, (lineNumber - 0) * _lineHeight);
 
         _leftScrollViewer.Offset = new Vector(horizontalOffset, verticalOffset);
 
