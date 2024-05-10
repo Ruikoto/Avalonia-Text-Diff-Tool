@@ -113,7 +113,7 @@ public partial class DiffView : UserControl
                 _ => _lineBrushRed
             };
 
-            oldTextLinesToHighlight.Add((i, brush));
+            oldTextLinesToHighlight.Add((i+1, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -130,7 +130,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            oldTextRangesToHighlight[i] = subPieceRanges;
+            oldTextRangesToHighlight[i+1] = subPieceRanges;
         }
 
         // 处理新文本差异
@@ -146,7 +146,7 @@ public partial class DiffView : UserControl
                 _ => _lineBrushGreen
             };
 
-            newTextLinesToHighlight.Add((i, brush));
+            newTextLinesToHighlight.Add((i+1, brush));
 
             var subPieceRanges = new List<(int Start, int Length)>();
             var currentPosition = 0;
@@ -163,7 +163,7 @@ public partial class DiffView : UserControl
                 currentPosition += length;
             }
 
-            newTextRangesToHighlight[i] = subPieceRanges;
+            newTextRangesToHighlight[i+1] = subPieceRanges;
         }
 
         // 清空原有的高亮渲染器
