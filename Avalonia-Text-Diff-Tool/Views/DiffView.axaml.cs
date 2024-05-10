@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia_Text_Diff_Tool.Utils;
 using Avalonia_Text_Diff_Tool.ViewModels;
@@ -243,9 +242,9 @@ public partial class DiffView : UserControl
 
         // 通过索引计算需要显示的矩形
         var olderRects =
-            CalculateRectanglesFromIndexes(olderDiffIndexes, olderEditorHeight, olderTotalLines, _lineHeight);
+            GenerateRectangles(olderDiffIndexes, olderEditorHeight, olderTotalLines, _lineHeight);
         var newerRects =
-            CalculateRectanglesFromIndexes(newerDiffIndexes, newerEditorHeight, newerTotalLines, _lineHeight);
+            GenerateRectangles(newerDiffIndexes, newerEditorHeight, newerTotalLines, _lineHeight);
 
         // 将矩形添加到 OlderEditor 的 Canvas 中
         foreach (var (x, y, width, height, brush) in olderRects)
@@ -269,7 +268,7 @@ public partial class DiffView : UserControl
     }
 
 
-    private static List<(double X, double Y, double Width, double Height, IBrush Brush)> CalculateRectanglesFromIndexes(
+    private static List<(double X, double Y, double Width, double Height, IBrush Brush)> GenerateRectangles(
         IEnumerable<(int Index, IBrush Brush, int Count)> indexes, double totalHeight, int totalLines,
         double lineHeight)
     {
@@ -300,9 +299,10 @@ public partial class DiffView : UserControl
 
         var diffIndexes = new List<(int Index, IBrush Brush, int Count)>();
 
-        for (var i = 0; i < lines.Count(); i++)
+        var diffPieces = lines.ToList();
+        for (var i = 0; i < diffPieces.Count; i++)
         {
-            var line = lines.ElementAt(i);
+            var line = diffPieces.ElementAt(i);
             var brush = line.Type switch
             {
                 ChangeType.Deleted => new SolidColorBrush(Color.Parse("#BBffAAcc")), // Red
