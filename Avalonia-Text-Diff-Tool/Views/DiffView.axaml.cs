@@ -92,8 +92,8 @@ public partial class DiffView : UserControl
 
     private void Render()
     {
-        var olderText = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
-        var newerText = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
+        var olderText = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty);
+        var newerText = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty); 
         Render(olderText, newerText, false);
     }
 
@@ -117,8 +117,8 @@ public partial class DiffView : UserControl
         Dispatcher.UIThread.Post(() =>
         {
             _isClearing = true;
-            OlderEditor.Text = OlderEditor.Text.Replace("\u200b\r\n", string.Empty);
-            NewerEditor.Text = NewerEditor.Text.Replace("\u200b\r\n", string.Empty);
+            OlderEditor.Text = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty);
+            NewerEditor.Text = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty);
             OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
             NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
             OlderEditorScrollIndicatorCanvas.Children.Clear();
@@ -163,13 +163,13 @@ public partial class DiffView : UserControl
             foreach (var line in _diffResult.OldText.Lines)
             {
                 if (!_viewModel.EnableDiff && line.Type == ChangeType.Imaginary) continue;
-                olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
+                olderSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u00a0" : line.Text);
             }
 
             foreach (var line in _diffResult.NewText.Lines)
             {
                 if (!_viewModel.EnableDiff && line.Type == ChangeType.Imaginary) continue;
-                newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u200b" : line.Text);
+                newerSb.AppendLine(line.Type == ChangeType.Imaginary ? "\u00a0" : line.Text);
             }
 
             OlderEditor.Text = olderSb.ToString().TrimEnd('\r', '\n');
