@@ -27,6 +27,7 @@ public class DiffViewModel : ViewModelBase
             if (value == _realTimeDiffering) return;
             _realTimeDiffering = value;
             EnableRenderButton = !value;
+            if (value) DoRender?.Invoke();
             OnPropertyChanged();
         }
     }

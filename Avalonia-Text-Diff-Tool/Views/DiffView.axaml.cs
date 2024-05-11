@@ -450,8 +450,10 @@ public partial class DiffView : UserControl
         if (filePath == null) return;
 
         var text = File.ReadAllText(filePath[0]);
+        _viewModel.RealTimeDiffering = false;
         if (editorSelection.HasFlag(EditorSelection.Left)) OlderEditor.Text = text;
         if (editorSelection.HasFlag(EditorSelection.Right)) NewerEditor.Text = text;
+        _viewModel.RealTimeDiffering = true;
     }
 
     private async void Export(EditorSelection editorSelection)
