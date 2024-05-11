@@ -13,6 +13,7 @@
         <Folder Include="Behaviors\"/>
         <Folder Include="Models\"/>
         <AvaloniaResource Include="Assets\**"/>
+        <Folder Include="screenshots\" />
     </ItemGroup>
 
     <ItemGroup>

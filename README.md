@@ -5,13 +5,16 @@
 
 - 实时编辑和实时差异显示
 - 两侧文本框同步滚动
-- 滚动条预览更改位置
+- 侧边快速预览更改位置
 
 # 引哪些库
 - [mmanela/diffplex](https://github.com/mmanela/diffplex)
-  - 指指点点：这个库很好👍，干净整洁速度快！
+  - 这个库很好👍，干净整洁速度快！
 - [AvaloniaUI/AvaloniaEdit](https://github.com/AvaloniaUI/AvaloniaEdit)
-  - 指指点点：一比吊糟，不知道是不是氯气吸多了整出来的半成品，每次找到一个看起来很牛逼的方法，调用一下发现没有任何卵用，进去查代码发现里面一行实现都没写，你搁这开发接口呢？
+  - 一比吊糟，不知道是不是氯气吸多了整出来的半成品，每次找到一个看起来很牛逼的方法，调用一下发现没有任何卵用，进去查代码发现里面一行实现都没写，你搁这开发接口呢？
+- [XuanXiaoming/Sarasa-Mono-SC-Nerd](https://github.com/XuanXiaoming/Sarasa-Mono-SC-Nerd)
+  - 因为AvaloniaEdit不支持字体 Fallback，所以使用同时支持中英文的更纱黑体的等宽版本，用于编辑器文本区域
 
 # 截几张图
-![image](https://github.com/Ruikoto/Avalonia-Text-Diff-Tool/assets/30781137/b3fd205b-250e-456d-ba21-f2c9e0b0abec)
+![image](screenshots/screenshot_01.jpg)
+![image](screenshots/screenshot_02.jpg)
