@@ -6,6 +6,7 @@
 - 实时编辑和实时差异显示
 - 两侧文本框同步滚动
 - 侧边快速预览更改位置
+- 导入/导出文件
 
 # 引哪些库
 - [mmanela/diffplex](https://github.com/mmanela/diffplex)
