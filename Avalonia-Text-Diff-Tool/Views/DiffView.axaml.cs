@@ -92,8 +92,8 @@ public partial class DiffView : UserControl
 
     private void Render()
     {
-        var olderText = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty);
-        var newerText = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty); 
+        var olderText = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty).Replace("\u00a0", " ");
+        var newerText = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty).Replace("\u00a0", " ");
         Render(olderText, newerText, false);
     }
 
@@ -117,8 +117,8 @@ public partial class DiffView : UserControl
         Dispatcher.UIThread.Post(() =>
         {
             _isClearing = true;
-            OlderEditor.Text = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty);
-            NewerEditor.Text = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty);
+            OlderEditor.Text = OlderEditor.Text.Replace("\u00a0\r\n", string.Empty).Replace("\u00a0", " ");
+            NewerEditor.Text = NewerEditor.Text.Replace("\u00a0\r\n", string.Empty).Replace("\u00a0", " ");
             OlderEditor.TextArea.TextView.BackgroundRenderers.Clear();
             NewerEditor.TextArea.TextView.BackgroundRenderers.Clear();
             OlderEditorScrollIndicatorCanvas.Children.Clear();
