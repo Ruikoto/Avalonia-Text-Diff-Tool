@@ -10,6 +10,6 @@
     <Application.Styles>
         <FluentTheme Mode="Light" />
         <StyleInclude Source="avares://AvaloniaEdit/AvaloniaEdit.xaml" />
-        <StyleInclude Source="avares://Avalonia-Text-Diff-Tool/Styles/TextEditorStyles.axaml"/>
+        <StyleInclude Source="avares://Avalonia-Text-Diff-Tool/Styles/TextEditorStyles.axaml" />
     </Application.Styles>
 </Application>

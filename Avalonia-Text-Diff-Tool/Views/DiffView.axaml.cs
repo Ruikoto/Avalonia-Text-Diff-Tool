@@ -7,7 +7,6 @@ using Avalonia;
 using Avalonia_Text_Diff_Tool.Utils;
 using Avalonia_Text_Diff_Tool.ViewModels;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -20,22 +19,21 @@ namespace Avalonia_Text_Diff_Tool.Views;
 public partial class DiffView : UserControl
 {
     private const int ScrollIndicatorWidth = 20;
-
+    private readonly IBrush _lineBrushBlue = new SolidColorBrush(Color.Parse("#FFc9c9f2"));
     private readonly IBrush _lineBrushGray = new SolidColorBrush(Color.Parse("#FFa4a4a4"));
     private readonly IBrush _lineBrushGreen = new SolidColorBrush(Color.Parse("#FFd1e3c9"));
     private readonly IBrush _lineBrushRed = new SolidColorBrush(Color.Parse("#FFffAAcc"));
-    private readonly IBrush _lineBrushBlue = new SolidColorBrush(Color.Parse("#FFc9c9f2"));
-    private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
     private readonly IBrush _rangeBrushBlue = new SolidColorBrush(Color.Parse("#FF9e9eBF"));
+    private readonly IBrush _rangeBrushGreen = new SolidColorBrush(Color.Parse("#FF96c294"));
     private readonly double _lineHeight;
     private readonly DispatcherTimer _scrollIndicatorTimer;
     private readonly DiffViewModel _viewModel;
 
     private SideBySideDiffModel? _diffResult;
-    private bool _isLeftScrolling;
-    private bool _isRightScrolling;
-    private bool _isReplacingText;
     private bool _isClearing;
+    private bool _isLeftScrolling;
+    private bool _isReplacingText;
+    private bool _isRightScrolling;
     private ScrollViewer? _leftScrollViewer;
     private ScrollViewer? _rightScrollViewer;
 
@@ -73,10 +71,7 @@ public partial class DiffView : UserControl
     private void ScheduleRenderScrollIndicators()
     {
         // 如果计时器未启动，则启用计时器
-        if (!_scrollIndicatorTimer.IsEnabled)
-        {
-            _scrollIndicatorTimer.IsEnabled = true;
-        }
+        if (!_scrollIndicatorTimer.IsEnabled) _scrollIndicatorTimer.IsEnabled = true;
     }
 
     #region Render Diff

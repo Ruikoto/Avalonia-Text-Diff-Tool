@@ -1,9 +1,10 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit">
-        <Style Selector="avaloniaEdit|TextEditor">
-            <!-- <Setter Property="FontFamily" Value="{DynamicResource SarasaMono}"/> -->
-            <Setter Property="FontFamily" Value="avares://Avalonia-Text-Diff-Tool/Assets/Sarasa-Mono-SC-Nerd.ttf#Sarasa Nerd"/>
-            <Setter Property="FontSize" Value="14"/>
-        </Style>
+    <Style Selector="avaloniaEdit|TextEditor">
+        <!-- <Setter Property="FontFamily" Value="{DynamicResource SarasaMono}"/> -->
+        <Setter Property="FontFamily"
+                Value="avares://Avalonia-Text-Diff-Tool/Assets/Sarasa-Mono-SC-Nerd.ttf#Sarasa Nerd" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
 </Styles>

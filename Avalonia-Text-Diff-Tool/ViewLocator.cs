@@ -1,7 +1,7 @@
 using System;
+using Avalonia_Text_Diff_Tool.ViewModels;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Avalonia_Text_Diff_Tool.ViewModels;
 
 namespace Avalonia_Text_Diff_Tool;
 

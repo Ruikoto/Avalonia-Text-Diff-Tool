@@ -6,21 +6,18 @@ namespace Avalonia_Text_Diff_Tool.ViewModels;
 
 public class DiffViewModel : ViewModelBase
 {
-    private bool _realTimeDiffering = true;
-    private bool _synchronousScrolling = true;
     private bool _enableDiff = true;
     private bool _enableRealTimeDifferingButton = true;
     private bool _enableRenderButton;
-    public event Action? DoClearDiff;
-
-    public event Action? DoRender;
-
-    public ICommand RenderCommand { get; set; }
+    private bool _realTimeDiffering = true;
+    private bool _synchronousScrolling = true;
 
     public DiffViewModel()
     {
-        RenderCommand = new RelayCommand(p=> DoRender?.Invoke());
+        RenderCommand = new RelayCommand(p => DoRender?.Invoke());
     }
+
+    public ICommand RenderCommand { get; set; }
 
     public bool RealTimeDiffering
     {
@@ -92,4 +89,8 @@ public class DiffViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+
+    public event Action? DoClearDiff;
+
+    public event Action? DoRender;
 }
