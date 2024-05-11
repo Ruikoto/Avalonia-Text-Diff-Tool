@@ -12,11 +12,26 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*">
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Spacing="5">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0"
+                    Grid.ColumnSpan="2" Margin="5" Spacing="5">
             <ToggleButton IsChecked="{Binding EnableDiff}">Enable Diffing</ToggleButton>
             <ToggleButton IsChecked="{Binding SynchronousScrolling}">Synchronous Scrolling</ToggleButton>
             <ToggleButton IsChecked="{Binding RealTimeDiffering}" IsEnabled="{Binding EnableRealTimeDifferingButton}">Real Time Differing</ToggleButton>
             <Button Command="{Binding RenderCommand}" IsEnabled="{Binding EnableRenderButton}">Diff</Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="0"
+                    Grid.ColumnSpan="2" Margin="5" Spacing="5">
+            <Menu>
+                <MenuItem Header="Import">
+                    <MenuItem Header="Both" Click="ImportBoth" />
+                    <MenuItem Header="Left" Click="ImportLeft" />
+                    <MenuItem Header="Right" Click="ImportRight" />
+                </MenuItem>
+                <MenuItem Header="Export">
+                    <MenuItem Header="Left" Click="ExportLeft" />
+                    <MenuItem Header="Right" Click="ExportRight" />
+                </MenuItem>
+            </Menu>
         </StackPanel>
 
         <Grid Grid.Row="1" Grid.Column="0">

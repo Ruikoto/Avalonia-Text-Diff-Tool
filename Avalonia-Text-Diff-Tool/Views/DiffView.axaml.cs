@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -7,6 +8,7 @@ using Avalonia;
 using Avalonia_Text_Diff_Tool.Utils;
 using Avalonia_Text_Diff_Tool.ViewModels;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -410,4 +412,78 @@ public partial class DiffView : UserControl
     }
 
     #endregion
+
+    private void ImportBoth(object? sender, RoutedEventArgs e)
+    {
+        Import(EditorSelection.Left | EditorSelection.Right);
+    }
+
+    private void ImportLeft(object? sender, RoutedEventArgs e)
+    {
+        Import(EditorSelection.Left);
+    }
+
+    private void ImportRight(object? sender, RoutedEventArgs e)
+    {
+        Import(EditorSelection.Right);
+    }
+
+    private void ExportLeft(object? sender, RoutedEventArgs e)
+    {
+        Export(EditorSelection.Left);
+    }
+
+    private void ExportRight(object? sender, RoutedEventArgs e)
+    {
+        Export(EditorSelection.Right);
+    }
+
+    private void Import(EditorSelection editorSelection)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Title = "Import Text",
+            AllowMultiple = false
+        };
+
+        var filePath = openFileDialog.ShowAsync((Window)Parent!).Result;
+        if (filePath == null) return;
+
+        var text = File.ReadAllText(filePath[0]);
+        if (editorSelection.HasFlag(EditorSelection.Left)) OlderEditor.Text = text;
+        if (editorSelection.HasFlag(EditorSelection.Right)) NewerEditor.Text = text;
+    }
+
+    private async void Export(EditorSelection editorSelection)
+    {
+        ClearDiff();
+
+        var saveFileDialog = new SaveFileDialog
+        {
+            Title = "Export Text",
+            InitialFileName = "Export.txt"
+        };
+
+        var filePath = await saveFileDialog.ShowAsync((Window)Parent!);
+        if (filePath != null)
+        {
+            var text = editorSelection switch
+            {
+                EditorSelection.Left => OlderEditor.Text,
+                EditorSelection.Right => NewerEditor.Text,
+                _ => throw new ArgumentOutOfRangeException(nameof(editorSelection), editorSelection, null)
+            };
+
+            await File.WriteAllTextAsync(filePath, text);
+        }
+
+        if (_viewModel.EnableDiff) Render();
+    }
+}
+
+[Flags]
+public enum EditorSelection
+{
+    Left = 1,
+    Right = 2
 }
