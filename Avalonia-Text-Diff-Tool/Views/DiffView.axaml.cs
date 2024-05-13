@@ -245,8 +245,8 @@ public partial class DiffView : UserControl
         NewerEditorScrollIndicatorCanvas.Children.Clear();
 
         // 获取文本框的总高度和每行的高度
-        var olderEditorHeight = OlderEditor.Bounds.Height;
-        var newerEditorHeight = NewerEditor.Bounds.Height;
+        var olderEditorHeight = Math.Min(OlderEditor.Bounds.Height, OlderEditor.LineCount * _lineHeight);
+        var newerEditorHeight = Math.Min(NewerEditor.Bounds.Height, NewerEditor.LineCount * _lineHeight);
 
         // 获取总行数
         var olderTotalLines = OlderEditor.Document.LineCount;
@@ -413,6 +413,8 @@ public partial class DiffView : UserControl
 
     #endregion
 
+    #region Import / Export
+
     private void ImportBoth(object? sender, RoutedEventArgs e)
     {
         Import(EditorSelection.Left | EditorSelection.Right);
@@ -481,6 +483,8 @@ public partial class DiffView : UserControl
 
         if (_viewModel.EnableDiff) Render();
     }
+
+    #endregion
 }
 
 [Flags]
