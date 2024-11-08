@@ -50,7 +50,7 @@
         <Grid Grid.Row="1" Grid.Column="1">
             <avaloniaEdit:TextEditor x:Name="NewerEditor"
                                      ShowLineNumbers="True"
-                                     SyntaxHighlighting="C#" />
+                                     SyntaxHighlighting="Lua" />
 
             <!-- 滚动条上的指示条 Canvas -->
             <Canvas x:Name="NewerEditorScrollIndicatorCanvas"

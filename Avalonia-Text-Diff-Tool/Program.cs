@@ -22,6 +22,7 @@ internal sealed class Program
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace()
-            .UseReactiveUI();
+            .UseReactiveUI()
+            .WithInterFont();
     }
 }
